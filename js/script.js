@@ -223,7 +223,7 @@ function inicializarCarousel() {
 function cerrarSesion() {
     localStorage.removeItem('sesionActiva');
     alert("Has cerrado sesión.");
-    window.location.href = '/index.html';
+    window.location.href = './index.html';
 }
 
 async function cargarSeccion(archivo, seccionId = null) {
