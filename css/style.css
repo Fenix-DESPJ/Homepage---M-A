@@ -646,3 +646,126 @@ h1, h2, h3, h4 {
         flex-direction: row !important;
     }
 }
+
+/* Regla base: el logo siempre es visible */
+#logo-container { display: flex !important; }
+
+/* Regla condicional: si el body tiene la clase, ocultamos el logo en escritorio */
+@media (min-width: 992px) {
+    body.sesion-iniciada #logo-container { display: none !important; }
+}
+
+/*Panel notificaciones*/
+/* Estilo para el panel de notificaciones */
+#notificaciones-panel {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    width: 280px;
+    background-color: #111111;
+    border: 1px solid #FFC600;
+    border-radius: 8px;
+    display: none; /* Oculto por defecto */
+    z-index: 9999;
+    padding: 15px;
+    color: #FFFFFF;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+#notificaciones-panel.active {
+    display: block;
+}
+
+/* --- SECCIÓN SERVICIOS: Ajustes de acabado --- */
+
+.servicios-container {
+    padding: 80px 20px;
+    background-color: #111111;
+}
+
+.servicios-grid {
+    display: grid;
+    /* Esto crea el grid responsivo automáticamente */
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    max-width: 1000px;
+    margin: 40px auto;
+}
+
+.servicio-card {
+    background: #1a1a1a;
+    border: 1px solid #FFC600;
+    border-radius: 20px;
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.servicio-card:hover {
+    transform: translateY(-10px);
+}
+
+.servicio-img {
+    width: 100%;
+    height: 200px; /* Altura fija para que todas las tarjetas sean iguales */
+    object-fit: cover;
+    border-radius: 15px;
+    margin-bottom: 20px;
+}
+
+/* Para que el botón de Bootstrap luzca más elegante */
+.servicio-card .btn-warning {
+    background-color: #FFC600;
+    border-color: #FFC600;
+    color: #000;
+    font-weight: bold;
+    border-radius: 10px;
+}
+
+.servicio-card .btn-warning:hover {
+    background-color: #e6b200;
+}
+
+/* Dale espacio al main para que el navbar fijo no tape el contenido */
+#main-content {
+    padding-top: 100px; /* Ajusta según la altura de tu navbar */
+    min-height: 80vh;   /* Asegura que el footer siempre quede abajo */
+}
+
+/* Mejora el título de la sección */
+.servicios-container h2 {
+    margin-bottom: 2rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+/* Servicios Individuales*/
+.servicios-grid-precios {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 15px;
+}
+
+.card-precio {
+    background-color: #FFC600; /* Amarillo marca */
+    color: #000;
+    padding: 15px;
+    border-radius: 15px;
+    transition: transform 0.2s;
+}
+
+.card-precio:hover {
+    transform: scale(1.02);
+}
+
+/* Ajuste para la imagen */
+.img-fluid {
+    max-height: 300px;
+    object-fit: cover;
+    width: 100%;
+}
+
+/* Esto hace que el navegador no pegue el título al borde del menú fijo */
+section {
+    scroll-margin-top: 100px; 
+}

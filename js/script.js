@@ -1,19 +1,18 @@
 document.addEventListener("DOMContentLoaded", async () => {
     
     // --- 1. LÓGICA DE CARGA DE COMPONENTES ---
-    // Dentro de la función cargarComponente en tu script.js
     async function cargarComponente(id, url) {
         const contenedor = document.getElementById(id);
         if (contenedor) {
             try {
+                // Ruta relativa sin / inicial para compatibilidad total
                 const response = await fetch(url);
                 if (response.ok) {
                     contenedor.innerHTML = await response.text();
                     
-                    // --- AQUÍ ESTÁ LA CLAVE ---
                     if (id === 'navbar-container') inicializarNavbar();
+                    
                     if (id === 'main-content') {
-                        // Si main-content contiene los barberos, inicializamos ahora
                         if (document.querySelector('.barbers-track')) {
                             inicializarCarousel();
                         }
@@ -25,10 +24,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
-    // Carga de componentes necesarios
-    if (document.getElementById('navbar-container')) cargarComponente('navbar-container', '/componentes/navbar.html');
-    if (document.getElementById('footer-container')) cargarComponente('footer-container', '/componentes/footer.html');
-    if (document.getElementById('main-content')) cargarComponente('main-content', '/secciones/info.html');
+    // Rutas relativas al archivo que carga el script
+    if (document.getElementById('navbar-container')) cargarComponente('navbar-container', 'componentes/navbar.html');
+    if (document.getElementById('footer-container')) cargarComponente('footer-container', 'componentes/footer.html');
+    if (document.getElementById('main-content')) cargarComponente('main-content', 'secciones/info.html');
+    if (document.getElementById('servicios-content')) cargarComponente('servicios-content', 'secciones/servicios.html');
 
     // --- 2. INICIALIZAR OTROS ELEMENTOS ---
     if (document.querySelector('.barbers-track')) inicializarCarousel();
@@ -48,7 +48,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             };
             localStorage.setItem('usuarioRegistrado', JSON.stringify(nuevoUsuario));
             alert("Registro exitoso.");
-            window.location.href = '/secciones/iniciarsesion.html';
+            // Redirección relativa
+            window.location.href = 'iniciarsesion.html';
         });
     }
 
@@ -63,7 +64,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             if (guardado && (inputUsuario === guardado.email || inputUsuario === guardado.telefono) && inputPass === guardado.password) {
                 localStorage.setItem('sesionActiva', JSON.stringify(guardado));
-                window.location.href = '/index.html';
+                // Redirección relativa a la raíz
+                window.location.href = '../index.html';
             } else {
                 alert('Usuario, teléfono o contraseña incorrectos');
             }
@@ -81,37 +83,61 @@ function inicializarNavbar() {
     const logoContainer = document.getElementById('logo-container');
     const gearIcon = document.getElementById('gear-icon-desktop');
 
-    // Limpieza inicial
     if (dynamicArea) dynamicArea.innerHTML = '';
     if (mobileBell) mobileBell.innerHTML = '';
     if (mobileExtra) mobileExtra.innerHTML = '';
 
-    const campanaHTML = `<i class="bi bi-bell-fill text-warning" style="font-size: 1.2rem; cursor: pointer;"></i>`;
+    const campanaHTML = `
+        <div id="bell-wrapper" style="position: relative;">
+            <i id="btn-notificaciones" class="bi bi-bell-fill text-warning" style="font-size: 1.2rem; cursor: pointer;"></i>
+            <div id="notificaciones-panel">
+                <h6 class="border-bottom border-warning pb-2">Notificaciones</h6>
+                <div id="lista-notificaciones">No tienes notificaciones nuevas.</div>
+            </div>
+        </div>
+    `;
+
+    const agregarEventoCampana = () => {
+        const btn = document.getElementById('btn-notificaciones');
+        const panel = document.getElementById('notificaciones-panel');
+        if (btn && panel) {
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                panel.classList.toggle('active');
+            };
+        }
+    };
+
+    document.addEventListener('click', (e) => {
+        const panel = document.getElementById('notificaciones-panel');
+        const btn = document.getElementById('btn-notificaciones');
+        if (panel && panel.classList.contains('active') && e.target !== btn) {
+            panel.classList.remove('active');
+        }
+    });
 
     if (sesion) {
-        // --- SESIÓN INICIADA ---
         if (authLinks) authLinks.classList.add('d-none');
-        
-        // Creamos el side-menu solo una vez
-        if (!document.getElementById('side-menu')) {
-            crearSideMenuDOM(sesion);
-        }
+        if (!document.getElementById('side-menu')) crearSideMenuDOM(sesion);
 
         if (window.innerWidth >= 992) {
-            // ESCRITORIO: Rueda, Saludo y Campana
             if (gearIcon) {
                 gearIcon.classList.remove('d-none');
+                gearIcon.style.setProperty('display', 'inline-block', 'important');
                 gearIcon.onclick = (e) => toggleSideMenu(e);
             }
+            if (logoContainer) logoContainer.style.setProperty('display', 'none', 'important');
             if (dynamicArea) {
                 dynamicArea.innerHTML = `<span class="text-warning fw-bold px-3">Hola, ${sesion.nombre}</span> ${campanaHTML}`;
+                agregarEventoCampana();
             }
         } else {
-            // MÓVIL: Solo Campana (sin rueda)
-            if (mobileBell) mobileBell.innerHTML = campanaHTML;
-            if (gearIcon) gearIcon.classList.add('d-none'); // Asegurar que la rueda no salga
-            
-            // Contenido del sidemenu dentro del menú hamburguesa (abajo de la línea)
+            if (logoContainer) logoContainer.style.setProperty('display', 'flex', 'important');
+            if (mobileBell) {
+                mobileBell.innerHTML = campanaHTML;
+                agregarEventoCampana();
+            }
+            if (gearIcon) gearIcon.style.setProperty('display', 'none', 'important');
             if (mobileExtra) {
                 mobileExtra.innerHTML = `
                     <hr class="text-white">
@@ -122,10 +148,9 @@ function inicializarNavbar() {
             }
         }
     } else {
-        // --- SESIÓN CERRADA ---
         if (authLinks) authLinks.classList.remove('d-none');
-        if (logoContainer) logoContainer.classList.remove('d-none');
-        if (gearIcon) gearIcon.classList.add('d-none');
+        if (logoContainer) logoContainer.style.setProperty('display', 'flex', 'important');
+        if (gearIcon) gearIcon.style.setProperty('display', 'none', 'important');
     }
 }
 
@@ -133,7 +158,6 @@ window.addEventListener('resize', inicializarNavbar);
 
 function crearSideMenuDOM(sesion) {
     if (document.getElementById('side-menu')) return;
-
     const menu = document.createElement('div');
     menu.id = 'side-menu';
     menu.innerHTML = `
@@ -148,11 +172,9 @@ function crearSideMenuDOM(sesion) {
             <button onclick="cerrarSesion()" class="btn btn-outline-danger w-100 mt-4">Cerrar Sesión</button>
         </div>
     `;
-
     const overlay = document.createElement('div');
     overlay.id = 'menu-overlay';
     overlay.onclick = toggleSideMenu;
-    
     document.body.appendChild(menu);
     document.body.appendChild(overlay);
 }
@@ -172,42 +194,27 @@ function inicializarCarousel() {
     const track = document.querySelector('.barbers-track');
     const nextBtn = document.getElementById('nextBtn');
     const prevBtn = document.getElementById('prevBtn');
-
     if (!track || !nextBtn || !prevBtn) return;
-
-    // Usamos el ancho del contenedor visible para saber cuánto mover
     const getScrollAmount = () => {
         const firstCard = track.querySelector('.barber-card');
         return firstCard ? firstCard.offsetWidth + 24 : 300;
     };
-
     nextBtn.addEventListener('click', () => {
         const cardWidth = getScrollAmount();
-        
         track.style.transition = 'transform 0.5s ease-in-out';
         track.style.transform = `translateX(-${cardWidth}px)`;
-        
         track.addEventListener('transitionend', () => {
             track.style.transition = 'none';
             track.appendChild(track.firstElementChild);
             track.style.transform = 'translateX(0)';
         }, { once: true });
     });
-
     prevBtn.addEventListener('click', () => {
         const cardWidth = getScrollAmount();
-        
-        // 1. Movemos el último al principio antes de animar
         track.insertBefore(track.lastElementChild, track.firstElementChild);
-        
-        // 2. Posicionamos el track a la izquierda para que al animar parezca que viene de atrás
         track.style.transition = 'none';
         track.style.transform = `translateX(-${cardWidth}px)`;
-        
-        // 3. Forzar reflow para que detecte el cambio de DOM
         track.offsetHeight; 
-        
-        // 4. Animamos hacia la posición original (0)
         track.style.transition = 'transform 0.5s ease-in-out';
         track.style.transform = 'translateX(0)';
     });
@@ -217,4 +224,27 @@ function cerrarSesion() {
     localStorage.removeItem('sesionActiva');
     alert("Has cerrado sesión.");
     window.location.href = '/index.html';
+}
+
+async function cargarSeccion(archivo, seccionId = null) {
+    const mainContent = document.getElementById('main-content');
+    const estamosEnInicio = document.getElementById('inicio') !== null;
+    if (estamosEnInicio && archivo === 'info.html') {
+        if (seccionId) document.querySelector(seccionId)?.scrollIntoView({ behavior: 'smooth' });
+        else window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+        try {
+            const response = await fetch(`secciones/${archivo}`);
+            if (!response.ok) throw new Error("No encontrado");
+            mainContent.innerHTML = await response.text();
+            if (seccionId) {
+                setTimeout(() => document.querySelector(seccionId)?.scrollIntoView({ behavior: 'smooth' }), 100);
+            }
+        } catch (err) { console.error("Error al cargar la sección:", err); }
+    }
+    const menu = document.getElementById('menu');
+    if (menu && menu.classList.contains('show')) {
+        const bsCollapse = new bootstrap.Collapse(menu);
+        bsCollapse.hide();
+    }
 }
