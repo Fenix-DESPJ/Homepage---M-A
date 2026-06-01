@@ -10,11 +10,13 @@
 
             <div class="col-md-4 text-center">
                 <div class="footer-links d-flex justify-content-center gap-3 flex-wrap">
-                    <a href="/index.html#inicio" class="text-white text-decoration-none small">Inicio</a>
-                    <a href="/index.html#barberos" class="text-white text-decoration-none small">Barberos</a>
-                    <a href="/index.html#marca" class="text-white text-decoration-none small">Marca</a>
-                    <a href="/index.html#contacto" class="text-white text-decoration-none small">Contacto</a>
-                    <a href="/secciones/agenda.html" class="text-white text-decoration-none small">Agendar</a>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="cargarSeccion('info.html'); return false;">Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="cargarSeccion('info.html', '#barberos'); return false;">Barberos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="cargarSeccion('info.html', '#marca'); return false;">Marca</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="cargarSeccion('servicios.html'); return false;">Servicios</a></li>
+                    <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="gestionarReserva(event)">Agendar</a>
+                    </li>
                 </div>
             </div>
             

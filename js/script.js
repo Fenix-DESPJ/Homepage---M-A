@@ -1,21 +1,23 @@
 document.addEventListener("DOMContentLoaded", async () => {
-    
+
+    // --- VARIABLES GLOBALES PARA MODALES ---
+    let pseModal, cardModal, successModal, reservationToast;
+
     // --- 1. LÓGICA DE CARGA DE COMPONENTES ---
     async function cargarComponente(id, url) {
         const contenedor = document.getElementById(id);
         if (contenedor) {
             try {
-                // Ruta relativa sin / inicial para compatibilidad total
                 const response = await fetch(url);
                 if (response.ok) {
                     contenedor.innerHTML = await response.text();
                     
+                    // Inicializaciones post-carga
                     if (id === 'navbar-container') inicializarNavbar();
                     
                     if (id === 'main-content') {
-                        if (document.querySelector('.barbers-track')) {
-                            inicializarCarousel();
-                        }
+                        if (document.querySelector('.barbers-track')) inicializarCarousel();
+                        if (url.includes('reservas.html')) inicializarLogicaReserva();
                     }
                 }
             } catch (err) {
@@ -24,16 +26,44 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
-    // Rutas relativas al archivo que carga el script
-    if (document.getElementById('navbar-container')) cargarComponente('navbar-container', 'componentes/navbar.html');
-    if (document.getElementById('footer-container')) cargarComponente('footer-container', 'componentes/footer.html');
-    if (document.getElementById('main-content')) cargarComponente('main-content', 'secciones/info.html');
-    if (document.getElementById('servicios-content')) cargarComponente('servicios-content', 'secciones/servicios.html');
+    // Cargas iniciales
+    if (document.getElementById('navbar-container')) cargarComponente('navbar-container', '../componentes/navbar.html');
+    if (document.getElementById('footer-container')) cargarComponente('footer-container', '../componentes/footer.html');
+    if (document.getElementById('main-content')) cargarComponente('main-content', '../secciones/info.html');
+    
+    // --- 2. GESTIÓN DE RESERVA (Nueva Lógica) ---
+    window.gestionarReserva = function(event) {
+        event.preventDefault();
+        const sesion = JSON.parse(localStorage.getItem('sesionActiva'));
+        
+        if (sesion) {
+            // En lugar de redirigir, "inyectamos" el HTML en el main
+            cargarComponente('main-content', '../secciones/reservas.html');
+        } else {
+            window.location.href = '../secciones/agenda.html';
+        }
+    };
 
-    // --- 2. INICIALIZAR OTROS ELEMENTOS ---
-    if (document.querySelector('.barbers-track')) inicializarCarousel();
+    // --- 3. LÓGICA DE RESERVA (Aislada) ---
+    function inicializarLogicaReserva() {
+        const servicio = document.getElementById("servicio");
+        if (!servicio) return;
 
-    // --- 3. LÓGICA DE REGISTRO ---
+        // Inicializar modales de Bootstrap
+        if (!pseModal) {
+            pseModal = new bootstrap.Modal(document.getElementById("pseModal"));
+            cardModal = new bootstrap.Modal(document.getElementById("cardModal"));
+            successModal = new bootstrap.Modal(document.getElementById("successModal"));
+            reservationToast = new bootstrap.Toast(document.getElementById("reservationToast"), { delay: 3000 });
+        }
+
+        // Selección y lógica...
+        console.log("Lógica de reserva inicializada");
+        // Aseguramos que se inyecte también la lógica del otro módulo si es necesario
+        inicializarModuloReservas();
+    }
+
+    // --- 4. LÓGICA DE LOGIN Y REGISTRO (Tu código original) ---
     const formRegistro = document.getElementById('registro-form');
     if (formRegistro) {
         formRegistro.addEventListener('submit', (e) => {
@@ -41,19 +71,15 @@ document.addEventListener("DOMContentLoaded", async () => {
             const nuevoUsuario = { 
                 nombre: document.getElementById('nombre').value,
                 apellido: document.getElementById('apellido').value,
-                fecha: document.getElementById('fecha').value,
                 email: document.getElementById('correo').value,
-                telefono: document.getElementById('telefono').value,
                 password: document.getElementById('password').value
             };
             localStorage.setItem('usuarioRegistrado', JSON.stringify(nuevoUsuario));
             alert("Registro exitoso.");
-            // Redirección relativa
             window.location.href = 'iniciarsesion.html';
         });
     }
 
-    // --- 4. LÓGICA DE LOGIN ---
     const formLogin = document.getElementById('form-login');
     if (formLogin) {
         formLogin.addEventListener('submit', (e) => {
@@ -62,12 +88,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             const inputPass = document.getElementById('password').value;
             const guardado = JSON.parse(localStorage.getItem('usuarioRegistrado'));
 
-            if (guardado && (inputUsuario === guardado.email || inputUsuario === guardado.telefono) && inputPass === guardado.password) {
+            if (guardado && (inputUsuario === guardado.email) && inputPass === guardado.password) {
                 localStorage.setItem('sesionActiva', JSON.stringify(guardado));
-                // Redirección relativa a la raíz
                 window.location.href = '../index.html';
             } else {
-                alert('Usuario, teléfono o contraseña incorrectos');
+                alert('Usuario o contraseña incorrectos');
             }
         });
     }
@@ -247,4 +272,134 @@ async function cargarSeccion(archivo, seccionId = null) {
         const bsCollapse = new bootstrap.Collapse(menu);
         bsCollapse.hide();
     }
+}
+
+// --- VARIABLES GLOBALES PARA MODALES (Fuera de la función) ---
+let pseModal_res, cardModal_res, successModal_res; 
+
+// --- LÓGICA DE RESERVAS (Encapsulada) ---
+function inicializarModuloReservas() {
+    // 1. SELECTORES
+    const calendarDays = document.getElementById("calendarDays");
+    const currentMonthYear = document.getElementById("currentMonthYear");
+    const prevMonth = document.getElementById("prevMonth");
+    const nextMonth = document.getElementById("nextMonth");
+    const hoursGrid = document.getElementById("hoursGrid");
+    
+    // Elementos de resumen y estado
+    const summaryService = document.getElementById("summaryService");
+    const summaryBarber = document.getElementById("summaryBarber");
+    const summaryDate = document.getElementById("summaryDate");
+    const summaryHour = document.getElementById("summaryHour");
+    const summaryPayment = document.getElementById("summaryPayment");
+    const selectedMethodDisplay = document.getElementById("selectedMethodDisplay");
+
+    let estado = { fecha: "", hora: "", metodo: "" };
+    let mesOffset = 0; 
+
+    // Inicializar instancias de modales de Bootstrap
+    const pseModal = new bootstrap.Modal(document.getElementById("pseModal"));
+    const cardModal = new bootstrap.Modal(document.getElementById("cardModal"));
+    const successModal = new bootstrap.Modal(document.getElementById("successModal"));
+
+    // 2. FUNCIÓN PARA DIBUJAR EL CALENDARIO
+    function renderizarCalendario() {
+        const fechaBase = new Date();
+        fechaBase.setMonth(fechaBase.getMonth() + mesOffset);
+        
+        const nombreMes = fechaBase.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+        currentMonthYear.textContent = nombreMes.charAt(0).toUpperCase() + nombreMes.slice(1);
+
+        calendarDays.innerHTML = '';
+        
+        const primerDia = new Date(fechaBase.getFullYear(), fechaBase.getMonth(), 1).getDay();
+        const diasEnMes = new Date(fechaBase.getFullYear(), fechaBase.getMonth() + 1, 0).getDate();
+        const offset = (primerDia === 0) ? 6 : primerDia - 1;
+
+        for (let i = 0; i < offset; i++) calendarDays.innerHTML += '<span></span>';
+
+        const hoy = new Date();
+        hoy.setHours(0,0,0,0);
+
+        for (let i = 1; i <= diasEnMes; i++) {
+            const fechaActual = new Date(fechaBase.getFullYear(), fechaBase.getMonth(), i);
+            const btn = document.createElement('button');
+            btn.className = 'day';
+            btn.textContent = i;
+
+            if (fechaActual < hoy) {
+                btn.disabled = true;
+                btn.classList.add('disabled-day');
+            } else {
+                btn.addEventListener("click", () => {
+                    document.querySelectorAll(".day").forEach(d => d.classList.remove("selected-day"));
+                    btn.classList.add("selected-day");
+                    estado.fecha = fechaActual.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+                    summaryDate.textContent = estado.fecha;
+                });
+            }
+            calendarDays.appendChild(btn);
+        }
+    }
+
+    // 3. NAVEGACIÓN MESES
+    prevMonth.addEventListener("click", () => { if (mesOffset > 0) { mesOffset--; renderizarCalendario(); } });
+    nextMonth.addEventListener("click", () => { if (mesOffset < 1) { mesOffset++; renderizarCalendario(); } });
+
+    // 4. GENERAR HORAS
+    const horas = ["08:00 AM", "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM", "06:00 PM", "07:00 PM"];
+    hoursGrid.innerHTML = '';
+    horas.forEach(hora => {
+        const btn = document.createElement('button');
+        btn.className = 'hour-card';
+        btn.textContent = hora;
+        btn.addEventListener("click", () => {
+            document.querySelectorAll(".hour-card").forEach(h => h.classList.remove("hour-selected"));
+            btn.classList.add("hour-selected");
+            estado.hora = hora;
+            summaryHour.textContent = hora;
+        });
+        hoursGrid.appendChild(btn);
+    });
+
+    // 5. EVENTOS SELECTS Y PAGOS
+    document.getElementById("servicio").addEventListener("change", (e) => summaryService.textContent = e.target.value);
+    document.getElementById("barbero").addEventListener("change", (e) => summaryBarber.textContent = e.target.value);
+
+    document.querySelectorAll(".payment-option").forEach(opcion => {
+        opcion.addEventListener("click", (e) => {
+            e.preventDefault();
+            estado.metodo = opcion.dataset.method;
+            selectedMethodDisplay.textContent = estado.metodo;
+            summaryPayment.textContent = estado.metodo;
+        });
+    });
+
+    // 6. LÓGICA DEL BOTÓN RESERVAR CON MODALES
+    document.getElementById("btnReservar").addEventListener("click", () => {
+        if (!estado.fecha || !estado.hora || !estado.metodo) {
+            alert("Por favor, selecciona fecha, hora y método de pago.");
+        } else {
+            if (estado.metodo === "PSE") {
+                pseModal.show();
+            } else if (estado.metodo === "Tarjeta de Crédito") {
+                cardModal.show();
+            } else {
+                successModal.show();
+            }
+        }
+    });
+
+    // Eventos de botones dentro de los modales
+    document.getElementById("btnPagarPSE")?.addEventListener("click", () => {
+        pseModal.hide();
+        successModal.show();
+    });
+
+    document.getElementById("btnPagarCard")?.addEventListener("click", () => {
+        cardModal.hide();
+        successModal.show();
+    });
+
+    renderizarCalendario();
 }
