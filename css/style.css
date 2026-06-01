@@ -1175,3 +1175,156 @@ h5 {
     }
 
 }
+
+/* PALETA DE COLORES DE LA BARBERÍA (Inspirado en tu proyecto anterior) */
+:root {
+    --bg-dark-page: #161513;        /* Fondo general de la página */
+    --bg-card: #1f1e1b;             /* Fondo de la tarjeta central */
+    --bg-input: #262421;            /* Fondo interno de los campos de texto */
+    --gold-accent: #cca553;         /* Dorado elegante para labels y bordes */
+    --gold-hover: #bca067;          /* Dorado al pasar el cursor */
+    --text-light: #f4f2ee;          /* Color del texto de los inputs */
+    --text-muted: #9e9b96;          /* Color grisáceo para textos secundarios */
+}
+
+/* Estilos de fondo globales */
+body {
+    background-color: var(--bg-dark-page);
+    color: var(--text-light);
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+}
+
+/* Estructura de la tarjeta central basada en image_f062a5.png */
+.edit-profile-card {
+    background-color: var(--bg-card);
+    width: 100%;
+    max-width: 650px;
+    padding: 40px 45px;
+    border-radius: 16px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+/* Título principal superior */
+.card-title {
+    color: var(--text-light);
+    font-weight: 600;
+    font-size: 1.85rem;
+    letter-spacing: 0.5px;
+}
+
+/* Etiquetas que van arriba de los controles (Centrados) */
+.form-label-custom {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    font-weight: 400;
+    margin-bottom: 8px;
+    display: inline-block;
+}
+
+/* Estilo unificado para inputs y selectores oscuros */
+.form-control-custom {
+    background-color: var(--bg-input) !important;
+    border: 1px solid rgba(204, 165, 83, 0.3) !important; /* Borde sutil dorado */
+    color: var(--text-light) !important;
+    border-radius: 8px !important;
+    padding: 11px 16px !important;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+/* Efecto focus al seleccionar campos */
+.form-control-custom:focus {
+    border-color: var(--gold-accent) !important;
+    box-shadow: 0 0 10px rgba(204, 165, 83, 0.2) !important;
+    outline: none;
+}
+
+/* Manejo de anchuras de teléfono móvil */
+.phone-prefix-wrapper {
+    width: 30%;
+}
+.phone-input {
+    width: 70%;
+}
+
+/* Modificación de la flecha de los Select en Bootstrap para que combine */
+select.form-control-custom {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23cca553' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+    background-position: right 12px center;
+    background-size: 12px 12px;
+}
+
+/* Estructura para los selectores de fecha con etiqueta flotante simulada */
+.date-select-container {
+    position: relative;
+    width: 32%;
+}
+
+.date-select-container .form-control-custom {
+    padding-top: 18px !important;
+    padding-bottom: 6px !important;
+    font-size: 0.9rem !important;
+}
+
+/* El texto pequeño encima de los selectores de fecha (Mes, Día, Año) */
+.date-label {
+    position: absolute;
+    top: 3px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    z-index: 5;
+    pointer-events: none;
+}
+
+/* Alineación de los textos de aceptación de WhatsApp */
+.checkbox-container-custom {
+    max-width: 530px;
+    padding-top: 10px;
+}
+
+.checkbox-text {
+    color: var(--text-light);
+    font-size: 0.85rem;
+    line-height: 1.4;
+    cursor: pointer;
+}
+
+/* Estilos de los checkboxes personalizados dorados */
+.custom-checkbox {
+    background-color: var(--bg-input) !important;
+    border: 1px solid var(--gold-accent) !important;
+    cursor: pointer;
+    border-radius: 4px !important;
+}
+
+.custom-checkbox:checked {
+    background-color: var(--gold-accent) !important;
+    border-color: var(--gold-accent) !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%231f1e1b' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e") !important;
+}
+
+.custom-checkbox:focus {
+    box-shadow: 0 0 5px rgba(204, 165, 83, 0.4) !important;
+}
+
+/* Botón de envío estilizado en dorado elegante en lugar de azul */
+.btn-guardar-custom {
+    background-color: var(--gold-accent) !important;
+    color: var(--bg-dark-page) !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 15px rgba(204, 165, 83, 0.2);
+    transition: all 0.3s ease;
+}
+
+.btn-guardar-custom:hover {
+    background-color: var(--gold-hover) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(204, 165, 83, 0.3);
+}
