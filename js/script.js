@@ -27,9 +27,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // Cargas iniciales
-    if (document.getElementById('navbar-container')) cargarComponente('navbar-container', '/navbar.html');
-    if (document.getElementById('footer-container')) cargarComponente('footer-container', '/componentes/footer.html');
-    if (document.getElementById('main-content')) cargarComponente('main-content', '/secciones/info.html');
+    // Cambia tus cargas iniciales por esto:
+    if (document.getElementById('navbar-container')) cargarComponente('navbar-container', `${rutaBase}/componentes/navbar.html`);
+    if (document.getElementById('footer-container')) cargarComponente('footer-container', `${rutaBase}/componentes/footer.html`);
+    if (document.getElementById('main-content')) cargarComponente('main-content', `${rutaBase}/secciones/info.html`);
     
     // --- 2. GESTIÓN DE RESERVA (Nueva Lógica) ---
     window.gestionarReserva = function(event) {
@@ -320,15 +321,61 @@ function inicializarLogicaPerfil() {
         inicializarNavbar();
     });
 }
+
+// --- RUTA BASE PARA GITHUB PAGES ---
+const esGitHub = window.location.hostname.includes('github.io');
+const rutaBase = esGitHub ? `/${window.location.pathname.split('/')[1]}` : '';
+
+window.cargarSeccion = async function(archivo) {
+    const mainContent = document.getElementById('main-content');
+    try {
+        // Usamos la rutaBase para que funcione en GitHub y en Local
+        const response = await fetch(`${rutaBase}/secciones/${archivo}`);
+        if (!response.ok) throw new Error("Archivo no encontrado");
+        mainContent.innerHTML = await response.text();
+        
+        if (archivo === 'perfil.html') {
+            inicializarLogicaPerfil();
+        }
+    } catch (err) {
+        console.error("Error al cargar:", err);
+    }
+};
+
 function inicializarLogicaPerfil() {
     const form = document.getElementById('formEditarPerfil');
-    if (form) {
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            alert("Perfil guardado con éxito");
-            // Aquí agregarías la lógica para guardar en localStorage
-        });
-    }
+    const sesion = JSON.parse(localStorage.getItem('sesionActiva'));
+
+    if (!sesion || !form) return;
+
+    // Rellenar campos existentes
+    document.getElementById('inputNombre').value = sesion.nombre || '';
+    document.getElementById('inputTelefono').value = sesion.telefono || '';
+    if (sesion.genero) document.getElementById('selectGenero').value = sesion.genero;
+    if (sesion.mesNac) document.getElementById('selectMes').value = sesion.mesNac;
+    if (sesion.diaNac) document.getElementById('selectDia').value = sesion.diaNac;
+    if (sesion.anioNac) document.getElementById('selectAnio').value = sesion.anioNac;
+    
+    document.getElementById('checkPromociones').checked = !!sesion.promoWpp;
+    document.getElementById('checkCitas').checked = !!sesion.citasWpp;
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        sesion.nombre = document.getElementById('inputNombre').value;
+        sesion.telefono = document.getElementById('inputTelefono').value;
+        sesion.genero = document.getElementById('selectGenero').value;
+        sesion.mesNac = document.getElementById('selectMes').value;
+        sesion.diaNac = document.getElementById('selectDia').value;
+        sesion.anioNac = document.getElementById('selectAnio').value;
+        sesion.promoWpp = document.getElementById('checkPromociones').checked;
+        sesion.citasWpp = document.getElementById('checkCitas').checked;
+
+        localStorage.setItem('sesionActiva', JSON.stringify(sesion));
+        localStorage.setItem('usuarioRegistrado', JSON.stringify(sesion));
+
+        alert("¡Perfil actualizado!");
+        inicializarNavbar();
+    });
 }
 
 // --- VARIABLES GLOBALES PARA MODALES (Fuera de la función) ---
