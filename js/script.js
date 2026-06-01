@@ -260,17 +260,26 @@ function cerrarSesion() {
 }
 
 // En tu script.js, al final del todo, fuera de cualquier otra función:
-window.cargarSeccion = async function(archivo) {
+window.cargarSeccion = async function(archivo, ancla = null) {
     const mainContent = document.getElementById('main-content');
     try {
-        const response = await fetch(`./secciones/${archivo}`);
+        // Asegúrate de que rutaBase esté definida como lo vimos antes
+        const response = await fetch(`${rutaBase}/secciones/${archivo}`);
         if (!response.ok) throw new Error("Archivo no encontrado");
+        
         mainContent.innerHTML = await response.text();
         
-        // --- NUEVA LÓGICA: Si cargamos el perfil, inicializamos sus campos ---
-        if (archivo === 'perfil.html') {
-            inicializarLogicaPerfil();
+        // Si hay un ancla, hacemos scroll después de un pequeño retraso para asegurar que el DOM esté listo
+        if (ancla) {
+            setTimeout(() => {
+                const elemento = document.querySelector(ancla);
+                if (elemento) {
+                    elemento.scrollIntoView({ behavior: 'smooth' });
+                }
+            }, 100); 
         }
+
+        if (archivo === 'perfil.html') inicializarLogicaPerfil();
     } catch (err) {
         console.error("Error al cargar:", err);
     }
