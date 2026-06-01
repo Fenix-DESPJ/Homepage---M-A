@@ -27,9 +27,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // Cargas iniciales
-    if (document.getElementById('navbar-container')) cargarComponente('navbar-container', '/componentes/navbar.html');
-    if (document.getElementById('footer-container')) cargarComponente('footer-container', '/componentes/footer.html');
-    if (document.getElementById('main-content')) cargarComponente('main-content', '/secciones/info.html');
+    if (document.getElementById('navbar-container')) cargarComponente('navbar-container', '../navbar.html');
+    if (document.getElementById('footer-container')) cargarComponente('footer-container', '../componentes/footer.html');
+    if (document.getElementById('main-content')) cargarComponente('main-content', '../secciones/info.html');
     
     // --- 2. GESTIÓN DE RESERVA (Nueva Lógica) ---
     window.gestionarReserva = function(event) {
@@ -38,9 +38,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         
         if (sesion) {
             // En lugar de redirigir, "inyectamos" el HTML en el main
-            cargarComponente('main-content', './secciones/reservas.html');
+            cargarComponente('main-content', '../secciones/reservas.html');
         } else {
-            window.location.href = './secciones/agenda.html';
+            window.location.href = '/secciones/agenda.html';
         }
     };
 
@@ -90,7 +90,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             if (guardado && (inputUsuario === guardado.email) && inputPass === guardado.password) {
                 localStorage.setItem('sesionActiva', JSON.stringify(guardado));
-                window.location.href = './index.html';
+                window.location.href = '/index.html';
             } else {
                 alert('Usuario o contraseña incorrectos');
             }
