@@ -163,12 +163,19 @@ function inicializarNavbar() {
                 agregarEventoCampana();
             }
             if (gearIcon) gearIcon.style.setProperty('display', 'none', 'important');
+            // Dentro de inicializarNavbar, en la parte del ELSE (mobileExtra):
             if (mobileExtra) {
                 mobileExtra.innerHTML = `
                     <hr class="text-white">
-                    <li class="nav-item"><a class="nav-link" href="#">👤 Mi Perfil</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">📅 Mis Reservas</a></li>
-                    <li class="nav-item"><button onclick="cerrarSesion()" class="nav-link text-danger border-0 bg-transparent w-100">Cerrar Sesión</button></li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="window.cargarSeccion('perfil.html'); return false;">👤 Mi Perfil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="window.cargarSeccion('reservas.html'); return false;">📅 Mis Reservas</a>
+                    </li>
+                    <li class="nav-item">
+                        <button onclick="cerrarSesion()" class="nav-link text-danger border-0 bg-transparent w-100">Cerrar Sesión</button>
+                    </li>
                 `;
             }
         }
@@ -192,7 +199,7 @@ function crearSideMenuDOM(sesion) {
             <h5 class="text-white mt-3">${sesion.nombre}</h5>
         </div>
         <div class="menu-items">
-            <a href="#">👤 Mi Perfil</a>
+            <a href="#" onclick="window.cargarSeccion('perfil.html'); toggleSideMenu(event);">👤 Mi Perfil</a>
             <a href="#">📅 Mis Reservas</a>
             <button onclick="cerrarSesion()" class="btn btn-outline-danger w-100 mt-4">Cerrar Sesión</button>
         </div>
@@ -251,26 +258,76 @@ function cerrarSesion() {
     window.location.href = './index.html';
 }
 
-async function cargarSeccion(archivo, seccionId = null) {
+// En tu script.js, al final del todo, fuera de cualquier otra función:
+window.cargarSeccion = async function(archivo) {
     const mainContent = document.getElementById('main-content');
-    const estamosEnInicio = document.getElementById('inicio') !== null;
-    if (estamosEnInicio && archivo === 'info.html') {
-        if (seccionId) document.querySelector(seccionId)?.scrollIntoView({ behavior: 'smooth' });
-        else window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-        try {
-            const response = await fetch(`secciones/${archivo}`);
-            if (!response.ok) throw new Error("No encontrado");
-            mainContent.innerHTML = await response.text();
-            if (seccionId) {
-                setTimeout(() => document.querySelector(seccionId)?.scrollIntoView({ behavior: 'smooth' }), 100);
-            }
-        } catch (err) { console.error("Error al cargar la sección:", err); }
+    try {
+        const response = await fetch(`../secciones/${archivo}`);
+        if (!response.ok) throw new Error("Archivo no encontrado");
+        mainContent.innerHTML = await response.text();
+        
+        // --- NUEVA LÓGICA: Si cargamos el perfil, inicializamos sus campos ---
+        if (archivo === 'perfil.html') {
+            inicializarLogicaPerfil();
+        }
+    } catch (err) {
+        console.error("Error al cargar:", err);
     }
-    const menu = document.getElementById('menu');
-    if (menu && menu.classList.contains('show')) {
-        const bsCollapse = new bootstrap.Collapse(menu);
-        bsCollapse.hide();
+};
+
+function inicializarLogicaPerfil() {
+    const form = document.getElementById('formEditarPerfil');
+    const sesion = JSON.parse(localStorage.getItem('sesionActiva'));
+
+    if (!sesion || !form) return;
+
+    // 1. Rellenar campos con los datos almacenados
+    // Usamos || '' para evitar que se muestre "undefined" si el dato no existe
+    document.getElementById('inputNombre').value = sesion.nombre || '';
+    document.getElementById('inputTelefono').value = sesion.telefono || '';
+    
+    // Seleccionar opciones en los <select>
+    if (sesion.genero) document.getElementById('selectGenero').value = sesion.genero;
+    if (sesion.mesNac) document.getElementById('selectMes').value = sesion.mesNac;
+    if (sesion.diaNac) document.getElementById('selectDia').value = sesion.diaNac;
+    if (sesion.anioNac) document.getElementById('selectAnio').value = sesion.anioNac;
+    
+    // Marcar los checkboxes
+    document.getElementById('checkPromociones').checked = !!sesion.promoWpp;
+    document.getElementById('checkCitas').checked = !!sesion.citasWpp;
+
+    // 2. Escuchar el evento de envío del formulario
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        // Actualizar el objeto sesion con los valores actuales del formulario
+        sesion.nombre = document.getElementById('inputNombre').value;
+        sesion.telefono = document.getElementById('inputTelefono').value;
+        sesion.genero = document.getElementById('selectGenero').value;
+        sesion.mesNac = document.getElementById('selectMes').value;
+        sesion.diaNac = document.getElementById('selectDia').value;
+        sesion.anioNac = document.getElementById('selectAnio').value;
+        sesion.promoWpp = document.getElementById('checkPromociones').checked;
+        sesion.citasWpp = document.getElementById('checkCitas').checked;
+
+        // Guardar cambios en el localStorage
+        localStorage.setItem('sesionActiva', JSON.stringify(sesion));
+        localStorage.setItem('usuarioRegistrado', JSON.stringify(sesion));
+
+        alert("¡Perfil actualizado correctamente!");
+        
+        // Refrescar el Navbar para que muestre el nombre actualizado
+        inicializarNavbar();
+    });
+}
+function inicializarLogicaPerfil() {
+    const form = document.getElementById('formEditarPerfil');
+    if (form) {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert("Perfil guardado con éxito");
+            // Aquí agregarías la lógica para guardar en localStorage
+        });
     }
 }
 

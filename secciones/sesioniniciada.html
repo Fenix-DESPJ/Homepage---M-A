@@ -17,18 +17,5 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="./js/script.js"></script>
 
-<script>
-    document.addEventListener("DOMContentLoaded", async () => {
-        // Usamos la función que ya existe en script.js
-        await cargarComponente('navbar-container', '../componentes/navbar.html');
-        await cargarComponente('footer-container', '../componentes/footer.html');
-        await cargarComponente('main-content', '../secciones/servicios.html');
-        
-        // Inicializar
-        if (typeof inicializarNavbar === 'function') inicializarNavbar();
-        
-        document.body.style.visibility = 'visible';
-    });
-</script>
 </body>
 </html>

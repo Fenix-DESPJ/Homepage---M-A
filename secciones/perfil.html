@@ -1,0 +1,57 @@
+<div class="container d-flex justify-content-center align-items-center min-vh-100 py-5">
+    <div class="edit-profile-card text-center">
+        <h1 class="card-title mb-3">¡Edita tu perfil!</h1>
+        <form id="formEditarPerfil">
+
+            <div class="form-group-custom mb-4 w-100">
+                <label for="inputNombre" class="form-label-custom d-block mb-2">Nombre</label>
+                <input type="text" id="inputNombre" class="form-control-custom text-center w-100" value="">
+            </div>
+
+            <div class="form-group-custom mb-4">
+                <label for="selectGenero" class="form-label-custom">Género</label>
+                <select id="selectGenero" class="form-select form-control-custom text-center">
+                    <option value="Masculino">Masculino</option>
+                    <option value="Femenino">Femenino</option>
+                    <option value="Otro">Otro / Prefiero no decirlo</option>
+                </select>
+            </div>
+
+            <div class="form-group-custom mb-4">
+                <label class="form-label-custom">Número de celular</label>
+                <div class="d-flex gap-2 justify-content-center">
+                    <input type="tel" id="inputTelefono" class="form-control-custom phone-input" value="" placeholder="Número">
+                </div>
+            </div>
+
+            <div class="form-group-custom mb-4">
+                <label class="form-label-custom mb-3">Fecha de nacimiento</label>
+                <div class="d-flex gap-2 justify-content-center">
+                    <select id="selectMes" class="form-select form-control-custom text-center">
+                        <option>Enero</option><option>Febrero</option><option>Marzo</option>
+                        <option>Abril</option><option>Mayo</option><option>Junio</option>
+                        <option>Julio</option><option>Agosto</option><option>Septiembre</option>
+                        <option>Octubre</option><option>Noviembre</option><option>Diciembre</option>
+                    </select>
+                    <select id="selectDia" class="form-select form-control-custom text-center">
+                        </select>
+                    <select id="selectAnio" class="form-select form-control-custom text-center">
+                        </select>
+                </div>
+            </div>
+
+            <div class="checkbox-container-custom text-start mx-auto mb-4">
+                <div class="form-check mb-3">
+                    <input class="form-check-input custom-checkbox" type="checkbox" id="checkPromociones">
+                    <label class="form-check-label checkbox-text" for="checkPromociones">Promociones por WhatsApp</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input custom-checkbox" type="checkbox" id="checkCitas">
+                    <label class="form-check-label checkbox-text" for="checkCitas">Cambios de cita por WhatsApp</label>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-guardar-custom px-5 py-2 fw-bold">Guardar</button>
+        </form>
+    </div>
+</div>
