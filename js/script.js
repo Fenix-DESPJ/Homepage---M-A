@@ -10,12 +10,28 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (!contenedor) return;
 
         try {
+            // 🚫 BLOQUEAR páginas completas (AQUÍ ESTÁ LA CLAVE)
+            if (
+                url.includes('iniciarsesion.html') ||
+                url.includes('registrarse.html') ||
+                url.includes('agenda.html')
+            ) {
+                window.location.href = url;
+                return;
+            }
+
             const response = await fetch(url);
             if (!response.ok) throw new Error("No se pudo cargar");
 
             contenedor.innerHTML = await response.text();
 
+            // ✅ Inicializaciones dinámicas
             if (id === 'navbar-container') inicializarNavbar();
+
+            if (id === 'main-content') {
+                if (url.includes('reservas.html')) inicializarLogicaReserva();
+                if (document.querySelector('.barbers-track')) inicializarCarousel();
+            }
 
         } catch (err) {
             console.error("Error cargando componente:", err);
@@ -23,30 +39,35 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // Cargas iniciales
-    // Cambia tus cargas iniciales por esto:
-    if (document.getElementById('navbar-container')) cargarComponente('navbar-container', `${rutaBase}/componentes/navbar.html`);
-    if (document.getElementById('footer-container')) cargarComponente('footer-container', `${rutaBase}/componentes/footer.html`);
-    if (document.getElementById('main-content')) cargarComponente('main-content', `${rutaBase}/secciones/info.html`);
+    if (document.getElementById('navbar-container')) {
+        cargarComponente('navbar-container', `${rutaBase}/componentes/navbar.html`);
+    }
+
+    if (document.getElementById('footer-container')) {
+        cargarComponente('footer-container', `${rutaBase}/componentes/footer.html`);
+    }
+
+    if (document.getElementById('main-content')) {
+        cargarComponente('main-content', `${rutaBase}/secciones/info.html`);
+    }
     
-    // --- 2. GESTIÓN DE RESERVA (Nueva Lógica) ---
+    // --- 2. GESTIÓN DE RESERVA ---
     window.gestionarReserva = function(event) {
         event.preventDefault();
         const sesion = JSON.parse(localStorage.getItem('sesionActiva'));
         
         if (sesion) {
-            // En lugar de redirigir, "inyectamos" el HTML en el main
             cargarComponente('main-content', `${rutaBase}/secciones/reservas.html`);
         } else {
             window.location.href = `${rutaBase}/secciones/agenda.html`;
         }
     };
 
-    // --- 3. LÓGICA DE RESERVA (Aislada) ---
+    // --- 3. LÓGICA DE RESERVA ---
     function inicializarLogicaReserva() {
         const servicio = document.getElementById("servicio");
         if (!servicio) return;
 
-        // Inicializar modales de Bootstrap
         if (!pseModal) {
             pseModal = new bootstrap.Modal(document.getElementById("pseModal"));
             cardModal = new bootstrap.Modal(document.getElementById("cardModal"));
@@ -54,25 +75,27 @@ document.addEventListener("DOMContentLoaded", async () => {
             reservationToast = new bootstrap.Toast(document.getElementById("reservationToast"), { delay: 3000 });
         }
 
-        // Selección y lógica...
         console.log("Lógica de reserva inicializada");
-        // Aseguramos que se inyecte también la lógica del otro módulo si es necesario
         inicializarModuloReservas();
     }
 
-    // --- 4. LÓGICA DE LOGIN Y REGISTRO (Tu código original) ---
+    // --- 4. LOGIN Y REGISTRO ---
     const formRegistro = document.getElementById('registro-form');
     if (formRegistro) {
         formRegistro.addEventListener('submit', (e) => {
             e.preventDefault();
+
             const nuevoUsuario = { 
                 nombre: document.getElementById('nombre').value,
                 apellido: document.getElementById('apellido').value,
                 email: document.getElementById('correo').value,
                 password: document.getElementById('password').value
             };
+
             localStorage.setItem('usuarioRegistrado', JSON.stringify(nuevoUsuario));
+
             alert("Registro exitoso.");
+
             window.location.href = `${rutaBase}/secciones/iniciarsesion.html`;
         });
     }
@@ -81,6 +104,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (formLogin) {
         formLogin.addEventListener('submit', (e) => {
             e.preventDefault();
+
             const inputUsuario = document.getElementById('usuario').value;
             const inputPass = document.getElementById('password').value;
             const guardado = JSON.parse(localStorage.getItem('usuarioRegistrado'));
@@ -93,6 +117,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         });
     }
+
 });
 
 // --- FUNCIONES GLOBALES ---
