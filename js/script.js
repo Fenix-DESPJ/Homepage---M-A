@@ -196,7 +196,7 @@ function crearSideMenuDOM(sesion) {
     menu.innerHTML = `
         <span class="close-menu-btn" onclick="toggleSideMenu(event)">×</span>
         <div class="menu-header">
-            <img src="./img/logo.jpeg" style="width: 80px; height: 80px; border-radius: 50%; border: 2px solid #FFC600;">
+            <img src="../img/logo.jpeg" style="width: 80px; height: 80px; border-radius: 50%; border: 2px solid #FFC600;">
             <h5 class="text-white mt-3">${sesion.nombre}</h5>
         </div>
         <div class="menu-items">
