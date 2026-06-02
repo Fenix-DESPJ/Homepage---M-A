@@ -28,9 +28,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Cargas iniciales
     // Cambia tus cargas iniciales por esto:
-    if (document.getElementById('navbar-container')) cargarComponente('navbar-container', `${rutaBase}/componentes/navbar.html`);
-    if (document.getElementById('footer-container')) cargarComponente('footer-container', `${rutaBase}/componentes/footer.html`);
-    if (document.getElementById('main-content')) cargarComponente('main-content', `${rutaBase}/secciones/info.html`);
+    if (document.getElementById('navbar-container')) cargarComponente('navbar-container', `${rutaBase}./componentes/navbar.html`);
+    if (document.getElementById('footer-container')) cargarComponente('footer-container', `${rutaBase}./componentes/footer.html`);
+    if (document.getElementById('main-content')) cargarComponente('main-content', `${rutaBase}./secciones/info.html`);
     
     // --- 2. GESTIÓN DE RESERVA (Nueva Lógica) ---
     window.gestionarReserva = function(event) {
