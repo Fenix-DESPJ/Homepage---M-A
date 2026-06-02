@@ -6,20 +6,28 @@ document.addEventListener("DOMContentLoaded", async () => {
     // --- 1. LÓGICA DE CARGA DE COMPONENTES ---
     async function cargarComponente(id, url) {
         const contenedor = document.getElementById(id);
+
         if (contenedor) {
             try {
+                // 🚫 BLOQUEAR páginas completas
+                if (url.includes('iniciarsesion.html') || url.includes('agenda.html')) {
+                    window.location.href = url;
+                    return;
+                }
+
                 const response = await fetch(url);
+
                 if (response.ok) {
                     contenedor.innerHTML = await response.text();
-                    
-                    // Inicializaciones post-carga
+
                     if (id === 'navbar-container') inicializarNavbar();
-                    
+
                     if (id === 'main-content') {
                         if (document.querySelector('.barbers-track')) inicializarCarousel();
                         if (url.includes('reservas.html')) inicializarLogicaReserva();
                     }
                 }
+
             } catch (err) {
                 console.error("Error cargando componente:", err);
             }
@@ -337,10 +345,17 @@ const rutaBase = window.location.hostname.includes('github.io')
 window.cargarSeccion = async function(archivo, ancla = null) {
     const mainContent = document.getElementById('main-content');
 
+    // 🚫 BLOQUEAR páginas completas
+    if (archivo === 'iniciarsesion.html' || archivo === 'agenda.html') {
+        window.location.href = `${rutaBase}/secciones/${archivo}`;
+        return;
+    }
+
     try {
         const response = await fetch(`${rutaBase}/secciones/${archivo}`);
         if (!response.ok) throw new Error("Archivo no encontrado");
 
+        // ✅ ESTO TE FALTABA
         mainContent.innerHTML = await response.text();
 
         // Scroll a ancla si existe
