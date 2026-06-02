@@ -28,9 +28,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Cargas iniciales
     // Cambia tus cargas iniciales por esto:
-    if (document.getElementById('navbar-container')) cargarComponente('navbar-container', `${rutaBase}./componentes/navbar.html`);
-    if (document.getElementById('footer-container')) cargarComponente('footer-container', `${rutaBase}./componentes/footer.html`);
-    if (document.getElementById('main-content')) cargarComponente('main-content', `${rutaBase}./secciones/info.html`);
+    if (document.getElementById('navbar-container')) cargarComponente('navbar-container', `${rutaBase}/componentes/navbar.html`);
+    if (document.getElementById('footer-container')) cargarComponente('footer-container', `${rutaBase}/componentes/footer.html`);
+    if (document.getElementById('main-content')) cargarComponente('main-content', `${rutaBase}/secciones/info.html`);
     
     // --- 2. GESTIÓN DE RESERVA (Nueva Lógica) ---
     window.gestionarReserva = function(event) {
@@ -39,9 +39,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         
         if (sesion) {
             // En lugar de redirigir, "inyectamos" el HTML en el main
-            cargarComponente('main-content', '/secciones/reservas.html');
+            cargarComponente('main-content', `${rutaBase}/secciones/reservas.html`);
         } else {
-            window.location.href = '/secciones/agenda.html';
+            window.location.href = `${rutaBase}/secciones/agenda.html`;
         }
     };
 
@@ -77,7 +77,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             };
             localStorage.setItem('usuarioRegistrado', JSON.stringify(nuevoUsuario));
             alert("Registro exitoso.");
-            window.location.href = 'iniciarsesion.html';
+            window.location.href = `${rutaBase}/secciones/iniciarsesion.html`;
         });
     }
 
@@ -91,7 +91,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             if (guardado && (inputUsuario === guardado.email) && inputPass === guardado.password) {
                 localStorage.setItem('sesionActiva', JSON.stringify(guardado));
-                window.location.href = '/index.html';
+                window.location.href = `${rutaBase}/index.html`;
             } else {
                 alert('Usuario o contraseña incorrectos');
             }
@@ -196,7 +196,7 @@ function crearSideMenuDOM(sesion) {
     menu.innerHTML = `
         <span class="close-menu-btn" onclick="toggleSideMenu(event)">×</span>
         <div class="menu-header">
-            <img src="../img/logo.jpeg" style="width: 80px; height: 80px; border-radius: 50%; border: 2px solid #FFC600;">
+            <img src="${rutaBase}/img/logo.jpeg" style="width: 80px; height: 80px; border-radius: 50%; border: 2px solid #FFC600;">
             <h5 class="text-white mt-3">${sesion.nombre}</h5>
         </div>
         <div class="menu-items">
@@ -227,63 +227,61 @@ function inicializarCarousel() {
     const track = document.querySelector('.barbers-track');
     const nextBtn = document.getElementById('nextBtn');
     const prevBtn = document.getElementById('prevBtn');
+
     if (!track || !nextBtn || !prevBtn) return;
+
+    let isAnimating = false; // 🔒 CONTROL DE BLOQUEO
+
     const getScrollAmount = () => {
         const firstCard = track.querySelector('.barber-card');
         return firstCard ? firstCard.offsetWidth + 24 : 300;
     };
+
     nextBtn.addEventListener('click', () => {
+        if (isAnimating) return; // 🚫 evita spam clicks
+        isAnimating = true;
+
         const cardWidth = getScrollAmount();
+
         track.style.transition = 'transform 0.5s ease-in-out';
         track.style.transform = `translateX(-${cardWidth}px)`;
+
         track.addEventListener('transitionend', () => {
             track.style.transition = 'none';
             track.appendChild(track.firstElementChild);
             track.style.transform = 'translateX(0)';
+
+            isAnimating = false; // 🔓 desbloquea
         }, { once: true });
     });
+
     prevBtn.addEventListener('click', () => {
+        if (isAnimating) return; // 🚫 evita spam clicks
+        isAnimating = true;
+
         const cardWidth = getScrollAmount();
+
         track.insertBefore(track.lastElementChild, track.firstElementChild);
+
         track.style.transition = 'none';
         track.style.transform = `translateX(-${cardWidth}px)`;
-        track.offsetHeight; 
+
+        track.offsetHeight; // fuerza reflow
+
         track.style.transition = 'transform 0.5s ease-in-out';
         track.style.transform = 'translateX(0)';
+
+        track.addEventListener('transitionend', () => {
+            isAnimating = false; // 🔓 desbloquea
+        }, { once: true });
     });
 }
 
 function cerrarSesion() {
     localStorage.removeItem('sesionActiva');
     alert("Has cerrado sesión.");
-    window.location.href = './index.html';
+    window.location.href = `${rutaBase}/index.html`;
 }
-
-// En tu script.js, al final del todo, fuera de cualquier otra función:
-window.cargarSeccion = async function(archivo, ancla = null) {
-    const mainContent = document.getElementById('main-content');
-    try {
-        // Asegúrate de que rutaBase esté definida como lo vimos antes
-        const response = await fetch(`${rutaBase}/secciones/${archivo}`);
-        if (!response.ok) throw new Error("Archivo no encontrado");
-        
-        mainContent.innerHTML = await response.text();
-        
-        // Si hay un ancla, hacemos scroll después de un pequeño retraso para asegurar que el DOM esté listo
-        if (ancla) {
-            setTimeout(() => {
-                const elemento = document.querySelector(ancla);
-                if (elemento) {
-                    elemento.scrollIntoView({ behavior: 'smooth' });
-                }
-            }, 100); 
-        }
-
-        if (archivo === 'perfil.html') inicializarLogicaPerfil();
-    } catch (err) {
-        console.error("Error al cargar:", err);
-    }
-};
 
 function inicializarLogicaPerfil() {
     const form = document.getElementById('formEditarPerfil');
@@ -332,60 +330,37 @@ function inicializarLogicaPerfil() {
 }
 
 // --- RUTA BASE PARA GITHUB PAGES ---
-const esGitHub = window.location.hostname.includes('github.io');
-const rutaBase = esGitHub ? `/${window.location.pathname.split('/')[1]}` : '';
+const rutaBase = window.location.hostname.includes('github.io')
+    ? '/Homepage---M-A' // ← CAMBIA esto por el nombre de tu repo
+    : '';
 
-window.cargarSeccion = async function(archivo) {
+window.cargarSeccion = async function(archivo, ancla = null) {
     const mainContent = document.getElementById('main-content');
+
     try {
-        // Usamos la rutaBase para que funcione en GitHub y en Local
         const response = await fetch(`${rutaBase}/secciones/${archivo}`);
         if (!response.ok) throw new Error("Archivo no encontrado");
+
         mainContent.innerHTML = await response.text();
-        
-        if (archivo === 'perfil.html') {
-            inicializarLogicaPerfil();
+
+        // Scroll a ancla si existe
+        if (ancla) {
+            setTimeout(() => {
+                const elemento = document.querySelector(ancla);
+                if (elemento) {
+                    elemento.scrollIntoView({ behavior: 'smooth' });
+                }
+            }, 100);
         }
+
+        // Inicializaciones dinámicas
+        if (archivo === 'perfil.html') inicializarLogicaPerfil();
+        if (archivo === 'reservas.html') inicializarLogicaReserva();
+
     } catch (err) {
         console.error("Error al cargar:", err);
     }
 };
-
-function inicializarLogicaPerfil() {
-    const form = document.getElementById('formEditarPerfil');
-    const sesion = JSON.parse(localStorage.getItem('sesionActiva'));
-
-    if (!sesion || !form) return;
-
-    // Rellenar campos existentes
-    document.getElementById('inputNombre').value = sesion.nombre || '';
-    document.getElementById('inputTelefono').value = sesion.telefono || '';
-    if (sesion.genero) document.getElementById('selectGenero').value = sesion.genero;
-    if (sesion.mesNac) document.getElementById('selectMes').value = sesion.mesNac;
-    if (sesion.diaNac) document.getElementById('selectDia').value = sesion.diaNac;
-    if (sesion.anioNac) document.getElementById('selectAnio').value = sesion.anioNac;
-    
-    document.getElementById('checkPromociones').checked = !!sesion.promoWpp;
-    document.getElementById('checkCitas').checked = !!sesion.citasWpp;
-
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        sesion.nombre = document.getElementById('inputNombre').value;
-        sesion.telefono = document.getElementById('inputTelefono').value;
-        sesion.genero = document.getElementById('selectGenero').value;
-        sesion.mesNac = document.getElementById('selectMes').value;
-        sesion.diaNac = document.getElementById('selectDia').value;
-        sesion.anioNac = document.getElementById('selectAnio').value;
-        sesion.promoWpp = document.getElementById('checkPromociones').checked;
-        sesion.citasWpp = document.getElementById('checkCitas').checked;
-
-        localStorage.setItem('sesionActiva', JSON.stringify(sesion));
-        localStorage.setItem('usuarioRegistrado', JSON.stringify(sesion));
-
-        alert("¡Perfil actualizado!");
-        inicializarNavbar();
-    });
-}
 
 // --- VARIABLES GLOBALES PARA MODALES (Fuera de la función) ---
 let pseModal_res, cardModal_res, successModal_res; 
