@@ -7,30 +7,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     async function cargarComponente(id, url) {
         const contenedor = document.getElementById(id);
 
-        if (contenedor) {
-            try {
-                // 🚫 BLOQUEAR páginas completas
-                if (url.includes('iniciarsesion.html') || url.includes('agenda.html')) {
-                    window.location.href = url;
-                    return;
-                }
+        if (!contenedor) return;
 
-                const response = await fetch(url);
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error("No se pudo cargar");
 
-                if (response.ok) {
-                    contenedor.innerHTML = await response.text();
+            contenedor.innerHTML = await response.text();
 
-                    if (id === 'navbar-container') inicializarNavbar();
+            if (id === 'navbar-container') inicializarNavbar();
 
-                    if (id === 'main-content') {
-                        if (document.querySelector('.barbers-track')) inicializarCarousel();
-                        if (url.includes('reservas.html')) inicializarLogicaReserva();
-                    }
-                }
-
-            } catch (err) {
-                console.error("Error cargando componente:", err);
-            }
+        } catch (err) {
+            console.error("Error cargando componente:", err);
         }
     }
 
