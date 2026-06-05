@@ -20,9 +20,17 @@ body{
     align-items:center;
 
     background:
-    radial-gradient(circle at top left,
-    var(--gris),
-    var(--negro) 60%);
+    linear-gradient(
+        rgba(0,0,0,0.75),
+        rgba(0,0,0,0.75)
+    ),
+    url("/img/fondoLogin.png");
+
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+    background-attachment:fixed;
+
 
     font-family:Arial, sans-serif;
 }
