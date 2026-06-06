@@ -24,7 +24,7 @@ body{
         rgba(0,0,0,0.75),
         rgba(0,0,0,0.75)
     ),
-    url("img/fondoLogin.png");
+    url("../img/fondoLogin.png");
 
     background-size:cover;
     background-position:center;
