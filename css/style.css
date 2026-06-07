@@ -37,6 +37,37 @@ h1, h2, h3, h4 {
   border-bottom: 1px solid rgba(255, 198, 0, 0.25);
 }
 
+/* ===== NAVBAR INDICADOR ACTIVO ===== */
+
+.navbar .nav-link {
+    position: relative;
+    color: white;
+    transition: color 0.3s ease;
+}
+
+.navbar .nav-link::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -5px;
+    width: 0;
+    height: 3px;
+    background-color: #FFC600; /* Dorado */
+    border-radius: 10px;
+    transform: translateX(-50%);
+    transition: width 0.3s ease;
+}
+
+/* Hover */
+.navbar .nav-link:hover::after {
+    width: 80%;
+}
+
+/* Sección activa */
+.navbar .nav-link.active::after {
+    width: 80%;
+}
+
 .logo {
   width: 50px;
   height: 50px;
@@ -1327,4 +1358,24 @@ select.form-control-custom {
     background-color: var(--gold-hover) !important;
     transform: translateY(-1px);
     box-shadow: 0 6px 20px rgba(204, 165, 83, 0.3);
+}
+
+#side-menu .menu-items a {
+    position: relative;
+}
+
+#side-menu .menu-items a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    width: 0;
+    height: 3px;
+    background-color: #FFC600;
+    border-radius: 10px;
+    transition: width 0.3s ease;
+}
+
+#side-menu .menu-items a.active::after {
+    width: 100%;
 }

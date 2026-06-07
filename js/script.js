@@ -5,12 +5,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // --- 1. LÓGICA DE CARGA DE COMPONENTES ---
     async function cargarComponente(id, url) {
+
         const contenedor = document.getElementById(id);
 
         if (!contenedor) return;
 
         try {
-            // 🚫 BLOQUEAR páginas completas (AQUÍ ESTÁ LA CLAVE)
+
             if (
                 url.includes('iniciarsesion.html') ||
                 url.includes('registrarse.html') ||
@@ -21,45 +22,91 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
 
             const response = await fetch(url);
-            if (!response.ok) throw new Error("No se pudo cargar");
+
+            if (!response.ok) {
+                throw new Error("No se pudo cargar");
+            }
 
             contenedor.innerHTML = await response.text();
 
-            // ✅ Inicializaciones dinámicas
-            if (id === 'navbar-container') inicializarNavbar();
-
-            if (id === 'main-content') {
-                if (url.includes('reservas.html')) inicializarLogicaReserva();
-                if (document.querySelector('.barbers-track')) inicializarCarousel();
+            // ← NUEVO
+            if (id === 'navbar-container') {
+                inicializarNavbar();
             }
 
-        } catch (err) {
+            if (id === 'main-content') {
+
+                if (url.includes('info.html')) {
+
+                    activarNav('nav-inicio');
+                    activarDetectorSecciones();
+
+                }
+
+                if (url.includes('reservas.html')) {
+
+                    activarNav('nav-agendar');
+
+                    inicializarLogicaReserva();
+
+                }
+
+                if (document.querySelector('.barbers-track')) {
+                    inicializarCarousel();
+                }
+            }
+
+        }
+        catch (err) {
+
             console.error("Error cargando componente:", err);
+
         }
     }
 
     // Cargas iniciales
     if (document.getElementById('navbar-container')) {
-        cargarComponente('navbar-container', `${rutaBase}/componentes/navbar.html`);
+        await cargarComponente(
+            'navbar-container',
+            `${rutaBase}/componentes/navbar.html`
+        );
     }
 
     if (document.getElementById('footer-container')) {
-        cargarComponente('footer-container', `${rutaBase}/componentes/footer.html`);
+        cargarComponente(
+            'footer-container',
+            `${rutaBase}/componentes/footer.html`
+        );
     }
 
     if (document.getElementById('main-content')) {
-        cargarComponente('main-content', `${rutaBase}/secciones/info.html`);
+        cargarComponente(
+            'main-content',
+            `${rutaBase}/secciones/info.html`
+        );
     }
-    
+
     // --- 2. GESTIÓN DE RESERVA ---
     window.gestionarReserva = function(event) {
+
         event.preventDefault();
+
         const sesion = JSON.parse(localStorage.getItem('sesionActiva'));
-        
+
         if (sesion) {
-            cargarComponente('main-content', `${rutaBase}/secciones/reservas.html`);
+
+            activarNav('nav-agendar');
+
+            cargarComponente(
+                'main-content',
+                `${rutaBase}/secciones/reservas.html`
+            );
+
         } else {
-            window.location.href = `${rutaBase}/secciones/agenda.html`;
+
+            window.location.href =
+                `${rutaBase}/secciones/agenda.html`;
+
         }
     };
 
@@ -189,14 +236,38 @@ function inicializarNavbar() {
             if (mobileExtra) {
                 mobileExtra.innerHTML = `
                     <hr class="text-white">
+
                     <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="window.cargarSeccion('perfil.html'); return false;">👤 Mi Perfil</a>
+                        <a class="nav-link"
+                        id="nav-perfil"
+                        href="#"
+                        onclick="
+                                window.cargarSeccion('perfil.html');
+                                activarNav('nav-perfil');
+                                return false;
+                        ">
+                            👤 Mi Perfil
+                        </a>
                     </li>
+
                     <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="window.cargarSeccion('reservas.html'); return false;">📅 Mis Reservas</a>
+                        <a class="nav-link"
+                        id="nav-mis-reservas"
+                        href="#"
+                        onclick="
+                                window.cargarSeccion('reservas.html');
+                                activarNav('nav-mis-reservas');
+                                return false;
+                        ">
+                            📅 Mis Reservas
+                        </a>
                     </li>
+
                     <li class="nav-item">
-                        <button onclick="cerrarSesion()" class="nav-link text-danger border-0 bg-transparent w-100">Cerrar Sesión</button>
+                        <button onclick="cerrarSesion()"
+                                class="nav-link text-danger border-0 bg-transparent w-100">
+                            Cerrar Sesión
+                        </button>
                     </li>
                 `;
             }
@@ -211,24 +282,57 @@ function inicializarNavbar() {
 window.addEventListener('resize', inicializarNavbar);
 
 function crearSideMenuDOM(sesion) {
+
     if (document.getElementById('side-menu')) return;
+
     const menu = document.createElement('div');
     menu.id = 'side-menu';
+
     menu.innerHTML = `
         <span class="close-menu-btn" onclick="toggleSideMenu(event)">×</span>
+
         <div class="menu-header">
-            <img src="${rutaBase}/img/logo.jpeg" style="width: 80px; height: 80px; border-radius: 50%; border: 2px solid #FFC600;">
+            <img src="${rutaBase}/img/logo.jpeg"
+                 style="width: 80px;
+                        height: 80px;
+                        border-radius: 50%;
+                        border: 2px solid #FFC600;">
+
             <h5 class="text-white mt-3">${sesion.nombre}</h5>
         </div>
+
         <div class="menu-items">
-            <a href="#" onclick="window.cargarSeccion('perfil.html'); toggleSideMenu(event);">👤 Mi Perfil</a>
-            <a href="#">📅 Mis Reservas</a>
-            <button onclick="cerrarSesion()" class="btn btn-outline-danger w-100 mt-4">Cerrar Sesión</button>
+
+            <a href="#"
+               onclick="
+                   window.cargarSeccion('perfil.html');
+                   toggleSideMenu(event);
+                   return false;
+               ">
+                👤 Mi Perfil
+            </a>
+
+            <a href="#"
+               onclick="
+                   window.cargarSeccion('reservas.html');
+                   toggleSideMenu(event);
+                   return false;
+               ">
+                📅 Mis Reservas
+            </a>
+
+            <button onclick="cerrarSesion()"
+                    class="btn btn-outline-danger w-100 mt-4">
+                Cerrar Sesión
+            </button>
+
         </div>
     `;
+
     const overlay = document.createElement('div');
     overlay.id = 'menu-overlay';
     overlay.onclick = toggleSideMenu;
+
     document.body.appendChild(menu);
     document.body.appendChild(overlay);
 }
@@ -356,38 +460,86 @@ const rutaBase = window.location.hostname.includes('github.io')
     : '';
 
 window.cargarSeccion = async function(archivo, ancla = null) {
+
     const mainContent = document.getElementById('main-content');
 
-    // 🚫 BLOQUEAR páginas completas
-    if (archivo === 'iniciarsesion.html' || archivo === 'agenda.html') {
-        window.location.href = `${rutaBase}/secciones/${archivo}`;
-        return;
-    }
-
     try {
+
         const response = await fetch(`${rutaBase}/secciones/${archivo}`);
-        if (!response.ok) throw new Error("Archivo no encontrado");
 
-        // ✅ ESTO TE FALTABA
-        mainContent.innerHTML = await response.text();
-
-        // Scroll a ancla si existe
-        if (ancla) {
-            setTimeout(() => {
-                const elemento = document.querySelector(ancla);
-                if (elemento) {
-                    elemento.scrollIntoView({ behavior: 'smooth' });
-                }
-            }, 100);
+        if (!response.ok) {
+            throw new Error("Archivo no encontrado");
         }
 
-        // Inicializaciones dinámicas
-        if (archivo === 'perfil.html') inicializarLogicaPerfil();
-        if (archivo === 'reservas.html') inicializarLogicaReserva();
+        mainContent.innerHTML = await response.text();
 
-    } catch (err) {
-        console.error("Error al cargar:", err);
+        // Inicializaciones
+        if (archivo === 'perfil.html') {
+            inicializarLogicaPerfil();
+
+            if (window.innerWidth < 992) {
+                activarNav('nav-perfil');
+            }
+        }
+
+        if (archivo === 'reservas.html') {
+            inicializarLogicaReserva();
+
+            if (window.innerWidth < 992) {
+                activarNav('nav-mis-reservas');
+            } else {
+                activarNav('nav-agendar');
+            }
+        }
+
+        if (document.querySelector('.barbers-track')) inicializarCarousel();
+
+        // ===== NAVBAR ACTIVO =====
+
+        if (archivo === 'servicios.html') {
+
+            activarNav('nav-servicios');
+
+        } else if (archivo === 'reservas.html') {
+
+            activarNav('nav-agendar');
+
+        } else if (archivo === 'info.html') {
+
+            // Activa Inicio por defecto
+            activarNav('nav-inicio');
+
+            // Activa el detector automático
+            activarDetectorSecciones();
+
+            // Si viene desde Barberos o Marca
+            if (ancla) {
+
+                setTimeout(() => {
+
+                    const elemento = document.querySelector(ancla);
+
+                    if (elemento) {
+
+                        elemento.scrollIntoView({
+                            behavior: 'smooth'
+                        });
+
+                    }
+
+                }, 100);
+
+            }
+
+        }
+
     }
+    catch (err) {
+
+        console.error(err);
+
+    }
+
 };
 
 // --- VARIABLES GLOBALES PARA MODALES (Fuera de la función) ---
@@ -518,4 +670,61 @@ function inicializarModuloReservas() {
     });
 
     renderizarCalendario();
+}
+
+function activarNav(id) {
+
+    document.querySelectorAll('.navbar .nav-link')
+        .forEach(link => link.classList.remove('active'));
+
+    const enlace = document.getElementById(id);
+
+    if (enlace) {
+        enlace.classList.add('active');
+    }
+}
+
+function activarDetectorSecciones() {
+
+    const secciones = [
+        { id: 'inicio', nav: 'nav-inicio' },
+        { id: 'barberos', nav: 'nav-barberos' },
+        { id: 'marca', nav: 'nav-marca' }
+    ];
+
+    function verificarSeccion() {
+
+        const posicion = window.scrollY + 150;
+
+        secciones.forEach(seccion => {
+
+            const elemento = document.getElementById(seccion.id);
+
+            if (!elemento) return;
+
+            const inicio = elemento.offsetTop;
+            const fin = inicio + elemento.offsetHeight;
+
+            if (posicion >= inicio && posicion < fin) {
+                activarNav(seccion.nav);
+            }
+        });
+    }
+
+    window.addEventListener('scroll', verificarSeccion);
+
+    // ← IMPORTANTE: ejecutarlo una vez al cargar
+    verificarSeccion();
+}
+
+function activarSideMenu(id) {
+
+    document.querySelectorAll('#side-menu .menu-items a')
+        .forEach(link => link.classList.remove('active'));
+
+    const enlace = document.getElementById(id);
+
+    if (enlace) {
+        enlace.classList.add('active');
+    }
 }

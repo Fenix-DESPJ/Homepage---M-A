@@ -18,12 +18,49 @@
 
     <div class="collapse navbar-collapse" id="menu">
       <ul class="navbar-nav align-items-center ms-auto" id="nav-user-area">
-        <li class="nav-item"><a class="nav-link" href="#" onclick="cargarSeccion('info.html'); return false;">Inicio</a></li>
-        <li class="nav-item"><a class="nav-link" href="#" onclick="cargarSeccion('info.html', '#barberos'); return false;">Barberos</a></li>
-        <li class="nav-item"><a class="nav-link" href="#" onclick="cargarSeccion('info.html', '#marca'); return false;">Marca</a></li>
-        <li class="nav-item"><a class="nav-link" href="#" onclick="cargarSeccion('servicios.html'); return false;">Servicios</a></li>
         <li class="nav-item">
-          <a class="nav-link" href="#" onclick="gestionarReserva(event)">Agendar</a>
+            <a class="nav-link"
+              id="nav-inicio"
+              href="#"
+              onclick="cargarSeccion('info.html'); return false;">
+              Inicio
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link"
+              id="nav-barberos"
+              href="#"
+              onclick="cargarSeccion('info.html', '#barberos'); return false;">
+              Barberos
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link"
+              id="nav-marca"
+              href="#"
+              onclick="cargarSeccion('info.html', '#marca'); return false;">
+              Marca
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link"
+              id="nav-servicios"
+              href="#"
+              onclick="cargarSeccion('servicios.html'); return false;">
+              Servicios
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link"
+              id="nav-agendar"
+              href="#"
+              onclick="gestionarReserva(event)">
+              Agendar
+            </a>
         </li>
         
         <li id="dynamic-nav-area" class="d-flex align-items-center"></li>
