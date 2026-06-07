@@ -1,11 +1,19 @@
 <nav class="navbar navbar-expand-lg navbar-dark py-3 fixed-top">
   <div class="container">
     <a class="navbar-brand d-flex align-items-center" href="#" id="brand-area">
-        <i class="bi bi-gear text-white me-2 d-none d-lg-inline" id="gear-icon-desktop" style="font-size:1.5rem; cursor:pointer;" onclick="toggleSideMenu(event)"></i>
+        <i class="bi bi-gear text-white me-2" 
+          id="gear-icon-desktop" 
+          style="font-size:1.5rem; cursor:pointer;" 
+          onclick="toggleSideMenu(event)"></i>
         
-        <div id="logo-container" class="d-flex align-items-center">
-            <img src="img/logo.jpeg" alt="Logo M&A" class="logo me-2" style="width: 40px; height: 40px; border-radius: 50%;">
-            <span>M&A Barber Shop</span>
+        <div id="logo-container" class="d-flex align-items-center d-lg-none">
+            <img src="img/logo.jpeg" alt="Logo M&A" class="logo me-2" 
+                style="width: 40px; height: 40px; border-radius: 50%;">
+        </div>
+
+        <div class="brand-text">
+            <span class="brand-title">M&A Barber Shop</span>
+            <small class="brand-role" id="brand-role">Cliente</small>
         </div>
     </a>
 

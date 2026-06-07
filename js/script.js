@@ -40,7 +40,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                     activarNav('nav-inicio');
                     activarDetectorSecciones();
-
+                    iniciarCarruselVisual();
+                    
                 }
 
                 if (url.includes('reservas.html')) {
@@ -176,6 +177,7 @@ function inicializarNavbar() {
     const mobileExtra = document.getElementById('mobile-extra-options');
     const logoContainer = document.getElementById('logo-container');
     const gearIcon = document.getElementById('gear-icon-desktop');
+    const brandRole = document.getElementById('brand-role'); // Capturamos el elemento
 
     if (dynamicArea) dynamicArea.innerHTML = '';
     if (mobileBell) mobileBell.innerHTML = '';
@@ -211,6 +213,8 @@ function inicializarNavbar() {
     });
 
     if (sesion) {
+        // --- LÓGICA CON SESIÓN ---
+        if (brandRole) brandRole.style.display = 'block'; // Mostrar rol
         if (authLinks) authLinks.classList.add('d-none');
         if (!document.getElementById('side-menu')) crearSideMenuDOM(sesion);
 
@@ -224,48 +228,32 @@ function inicializarNavbar() {
             if (dynamicArea) {
                 dynamicArea.innerHTML = `<span class="text-warning fw-bold px-3">Hola, ${sesion.nombre}</span> ${campanaHTML}`;
                 agregarEventoCampana();
+                actualizarNotificaciones();
             }
         } else {
             if (logoContainer) logoContainer.style.setProperty('display', 'flex', 'important');
             if (mobileBell) {
                 mobileBell.innerHTML = campanaHTML;
                 agregarEventoCampana();
+                actualizarNotificaciones();
             }
             if (gearIcon) gearIcon.style.setProperty('display', 'none', 'important');
-            // Dentro de inicializarNavbar, en la parte del ELSE (mobileExtra):
+            
             if (mobileExtra) {
                 mobileExtra.innerHTML = `
                     <hr class="text-white">
-
                     <li class="nav-item">
-                        <a class="nav-link"
-                        id="nav-perfil"
-                        href="#"
-                        onclick="
-                                window.cargarSeccion('perfil.html');
-                                activarNav('nav-perfil');
-                                return false;
-                        ">
+                        <a class="nav-link" id="nav-perfil" href="#" onclick="window.cargarSeccion('perfil.html'); activarNav('nav-perfil'); return false;">
                             👤 Mi Perfil
                         </a>
                     </li>
-
                     <li class="nav-item">
-                        <a class="nav-link"
-                        id="nav-mis-reservas"
-                        href="#"
-                        onclick="
-                                window.cargarSeccion('reservas.html');
-                                activarNav('nav-mis-reservas');
-                                return false;
-                        ">
+                        <a class="nav-link" id="nav-mis-reservas" href="#" onclick="window.cargarSeccion('reservas.html'); activarNav('nav-mis-reservas'); return false;">
                             📅 Mis Reservas
                         </a>
                     </li>
-
                     <li class="nav-item">
-                        <button onclick="cerrarSesion()"
-                                class="nav-link text-danger border-0 bg-transparent w-100">
+                        <button onclick="cerrarSesion()" class="nav-link text-danger border-0 bg-transparent w-100">
                             Cerrar Sesión
                         </button>
                     </li>
@@ -273,6 +261,8 @@ function inicializarNavbar() {
             }
         }
     } else {
+        // --- LÓGICA SIN SESIÓN ---
+        if (brandRole) brandRole.style.display = 'none'; // Ocultar rol
         if (authLinks) authLinks.classList.remove('d-none');
         if (logoContainer) logoContainer.style.setProperty('display', 'flex', 'important');
         if (gearIcon) gearIcon.style.setProperty('display', 'none', 'important');
@@ -473,6 +463,12 @@ window.cargarSeccion = async function(archivo, ancla = null) {
 
         mainContent.innerHTML = await response.text();
 
+        // Carrusel superior
+
+        if (document.querySelector('.carrusel-container')) {
+            iniciarCarruselVisual();
+        }
+
         // Inicializaciones
         if (archivo === 'perfil.html') {
             inicializarLogicaPerfil();
@@ -653,20 +649,50 @@ function inicializarModuloReservas() {
             } else if (estado.metodo === "Tarjeta de Crédito") {
                 cardModal.show();
             } else {
+
+                guardarReserva({
+                    servicio: summaryService.textContent,
+                    barbero: summaryBarber.textContent,
+                    fecha: estado.fecha,
+                    hora: estado.hora,
+                    metodo: estado.metodo
+                });
+
                 successModal.show();
+
             }
         }
     });
 
     // Eventos de botones dentro de los modales
-    document.getElementById("btnPagarPSE")?.addEventListener("click", () => {
+        document.getElementById("btnPagarPSE")?.addEventListener("click", () => {
+
+        guardarReserva({
+            servicio: summaryService.textContent,
+            barbero: summaryBarber.textContent,
+            fecha: estado.fecha,
+            hora: estado.hora,
+            metodo: estado.metodo
+        });
+
         pseModal.hide();
         successModal.show();
+
     });
 
     document.getElementById("btnPagarCard")?.addEventListener("click", () => {
+
+        guardarReserva({
+            servicio: summaryService.textContent,
+            barbero: summaryBarber.textContent,
+            fecha: estado.fecha,
+            hora: estado.hora,
+            metodo: estado.metodo
+        });
+
         cardModal.hide();
         successModal.show();
+
     });
 
     renderizarCalendario();
@@ -727,4 +753,82 @@ function activarSideMenu(id) {
     if (enlace) {
         enlace.classList.add('active');
     }
+}
+
+/* guardar reservas */
+function guardarReserva(reserva) {
+
+    let reservas = JSON.parse(localStorage.getItem('reservas')) || [];
+
+    reservas.push({
+        ...reserva,
+        fechaRegistro: new Date().toISOString()
+    });
+
+    localStorage.setItem('reservas', JSON.stringify(reservas));
+
+    actualizarNotificaciones();
+}
+
+function actualizarNotificaciones() {
+
+    const lista = document.getElementById('lista-notificaciones');
+
+    if (!lista) return;
+
+    const reservas = JSON.parse(localStorage.getItem('reservas')) || [];
+
+    if (reservas.length === 0) {
+
+        lista.innerHTML = 'No tienes notificaciones nuevas.';
+        return;
+
+    }
+
+    lista.innerHTML = reservas
+        .slice()
+        .reverse()
+        .map(reserva => `
+            <div class="notification-item border-bottom pb-2 mb-2">
+
+                <strong>📅 Reserva confirmada</strong>
+
+                <div>
+                    ${reserva.servicio}
+                </div>
+
+                <small>
+                    ${reserva.fecha} - ${reserva.hora}
+                </small>
+
+                <br>
+
+                <small>
+                    👤 ${reserva.barbero}
+                </small>
+
+            </div>
+        `)
+        .join('');
+}
+
+// Esta función la llamas cada vez que inyectas HTML nuevo
+function iniciarCarruselVisual() {
+    const carrusel = document.querySelector('.carrusel-container');
+    if (!carrusel) return;
+
+    const images = carrusel.querySelectorAll('img');
+    if (images.length === 0) return;
+
+    let currentIndex = 0;
+
+    // Limpiamos cualquier intervalo previo para evitar duplicados
+    if (window.carruselInterval) clearInterval(window.carruselInterval);
+
+    window.carruselInterval = setInterval(() => {
+        images[currentIndex].classList.remove('active');
+        currentIndex = (currentIndex + 1) % images.length;
+        images[currentIndex].classList.add('active');
+        console.log("Carrusel rotando, imagen:", currentIndex);
+    }, 2000);
 }

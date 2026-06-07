@@ -148,17 +148,30 @@ h1, h2, h3, h4 {
   padding: 12px 30px;
 }
 
-/* Imagen principal y tarjeta de "Servicio Premium" */
-.imagen-principal {
-  position: relative;
+/* Este es el contenedor que debe tener el diseño que buscas */
+.carrusel-container {
+    position: relative;
+    width: 100%;
+    height: 520px; /* Ajustado a la altura que querías */
+    border-radius: 35px; /* Bordes redondeados */
+    overflow: hidden;
+    border: 2px solid rgba(255, 198, 0, 0.35); /* El borde dorado que definiste */
 }
 
-.imagen-principal img {
-  width: 100%;
-  height: 520px;
-  object-fit: cover;
-  border-radius: 35px;
-  border: 2px solid rgba(255, 198, 0, 0.35);
+/* Las imágenes ahora ocupan este espacio con el estilo correcto */
+.carrusel-container img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.carrusel-container img.active {
+    opacity: 1;
 }
 
 .tarjeta-flotante {
@@ -686,27 +699,83 @@ h1, h2, h3, h4 {
     body.sesion-iniciada #logo-container { display: none !important; }
 }
 
-/*Panel notificaciones*/
-/* Estilo para el panel de notificaciones */
+/* Panel de notificaciones - Estilo "Elegancia Visual" */
 #notificaciones-panel {
     position: absolute;
-    top: 50px;
-    right: 0;
-    width: 280px;
-    background-color: #111111;
-    border: 1px solid #FFC600;
-    border-radius: 8px;
-    display: none; /* Oculto por defecto */
+    top: 70px;
+    right: 15px;
+    width: 340px;
+    background: var(--negro);
+    border: 1px solid #333; /* Borde muy sutil, no brillante */
+    border-radius: 16px;
+    display: none;
     z-index: 9999;
-    padding: 15px;
-    color: #FFFFFF;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    padding: 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    /* Animación de apertura fluida */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 #notificaciones-panel.active {
     display: block;
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
 }
 
+/* Título con mucho aire alrededor para que no abrume */
+#notificaciones-panel h6 {
+    margin: 0 0 20px 0;
+    color: var(--dorado);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2rem;
+    font-weight: 600;
+}
+
+/* Contenedor de items con espacio cómodo */
+#lista-notificaciones {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Espacio cómodo entre notificaciones */
+}
+
+/* Notificación estilizada: Diseño de tarjeta flotante */
+.notification-item {
+    background: #1a1a1a; /* Un gris muy oscuro que destaca sobre el negro del panel */
+    padding: 16px;
+    border-radius: 12px;
+    border-left: 4px solid var(--dorado); /* Solo el acento dorado */
+    transition: transform 0.2s;
+}
+
+.notification-item strong {
+    display: block;
+    color: #ffffff; /* Blanco suave */
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.notification-item small {
+    display: block;
+    color: #888; /* Gris plata suave, cómodo de leer */
+    font-size: 0.8rem;
+    line-height: 1.5;
+}
+
+/* Efecto hover elegante */
+.notification-item:hover {
+    transform: translateX(5px);
+    background: #222;
+}
+
+/* Scrollbar minimalista */
+#lista-notificaciones::-webkit-scrollbar { width: 4px; }
+#lista-notificaciones::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
 /* --- SECCIÓN SERVICIOS: Ajustes de acabado --- */
 
 .servicios-container {
@@ -877,6 +946,7 @@ h5 {
     height: 55px;
     object-fit: contain;
 }
+
 .nav-links {
     list-style: none;
     display: flex;
@@ -1378,4 +1448,101 @@ select.form-control-custom {
 
 #side-menu .menu-items a.active::after {
     width: 100%;
+}
+
+.brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+}
+
+.brand-title {
+    color: var(--dorado-branding);
+    font-family: var(--fuente-titulos);
+    font-size: 1.8rem;
+    font-weight: bold;
+}
+
+.brand-role {
+    color: #e2e2e2;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* Corrección y unificación de Brand Area */
+#brand-area {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px; /* Espacio entre el icono y el resto del logo */
+    text-decoration: none;
+}
+
+/* Asegurar visibilidad del icono solo en escritorio */
+#gear-icon-desktop {
+    cursor: pointer;
+    font-size: 1.5rem;
+}
+
+/* Asegurar que el icono solo se vea en escritorio como querías */
+@media (max-width: 991px) {
+    #gear-icon-desktop {
+        display: none !important;
+    }
+}
+
+/* Ajuste para que el texto y la rueda queden bien alineados en escritorio */
+@media (min-width: 992px) {
+    #brand-area {
+        gap: 15px; /* Espacio entre rueda y nombre */
+    }
+}
+
+.contenedor-principal-visual {
+    position: relative;
+    width: 100%;
+}
+
+.carrusel-container {
+    position: relative;
+    width: 100%;
+    height: 400px; /* Asegura esta altura */
+    border-radius: 15px;
+    overflow: hidden;
+    background-color: #f0f0f0; /* Color de fondo por si la imagen tarda en cargar */
+}
+
+.carrusel-container img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    /* Esto es importante si las imágenes no cargan bien */
+    display: block; 
+}
+
+.carrusel-container img.active {
+    opacity: 1;
+}
+
+.contenedor-principal-visual {
+    position: relative;
+}
+
+.tarjeta-flotante {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 15px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+    z-index: 2;
 }
