@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", async () => {
 
     // --- VARIABLES GLOBALES PARA MODALES ---
-    let pseModal, cardModal, successModal, reservationToast;
+    let pseModal, cardModal, successModal, reservationToast, loginRegisterModal;
 
     // --- 1. LÓGICA DE CARGA DE COMPONENTES ---
     async function cargarComponente(id, url) {
@@ -85,7 +85,65 @@ document.addEventListener("DOMContentLoaded", async () => {
             'main-content',
             `${rutaBase}/secciones/info.html`
         );
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('reserva') === 'true' && JSON.parse(localStorage.getItem('sesionActiva'))) {
+            activarNav('nav-agendar');
+            cargarComponente('main-content', `${rutaBase}/secciones/reservas.html`);
+        }
     }
+
+    if (document.getElementById('loginRegisterModal')) {
+        loginRegisterModal = new bootstrap.Modal(document.getElementById('loginRegisterModal'));
+
+        const loginTabButton = document.getElementById('login-tab');
+        const registerTabButton = document.getElementById('register-tab');
+        const switchToRegisterBtn = document.getElementById('switchToRegisterBtn');
+        const switchToLoginBtn = document.getElementById('switchToLoginBtn');
+
+        if (switchToRegisterBtn && registerTabButton) {
+            switchToRegisterBtn.addEventListener('click', () => new bootstrap.Tab(registerTabButton).show());
+        }
+
+        if (switchToLoginBtn && loginTabButton) {
+            switchToLoginBtn.addEventListener('click', () => new bootstrap.Tab(loginTabButton).show());
+        }
+    }
+
+    function mostrarAuthModal() {
+        const sesion = JSON.parse(localStorage.getItem('sesionActiva'));
+
+        if (sesion) {
+            activarNav('nav-agendar');
+            cargarComponente('main-content', `${rutaBase}/secciones/reservas.html`);
+            return;
+        }
+
+        sessionStorage.setItem('loginAfterReserve', 'true');
+
+        if (loginRegisterModal) {
+            loginRegisterModal.show();
+            return;
+        }
+
+        window.location.href = `${rutaBase}/secciones/iniciarsesion.html`;
+    }
+
+    document.addEventListener('click', (event) => {
+        const reservaBtn = event.target.closest('.btn-servicio-reservar');
+        if (!reservaBtn) return;
+
+        event.preventDefault();
+
+        const sesion = JSON.parse(localStorage.getItem('sesionActiva'));
+
+        if (sesion) {
+            activarNav('nav-agendar');
+            cargarComponente('main-content', `${rutaBase}/secciones/reservas.html`);
+        } else {
+            mostrarAuthModal();
+        }
+    });
 
     // --- 2. GESTIÓN DE RESERVA ---
     window.gestionarReserva = function(event) {
@@ -105,8 +163,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         } else {
 
-            window.location.href =
-                `${rutaBase}/secciones/agenda.html`;
+            window.location.href = `${rutaBase}/secciones/agenda.html`;
 
         }
     };
@@ -128,21 +185,94 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // --- 4. LOGIN Y REGISTRO ---
+
+    // Helpers para manejo de múltiples usuarios en localStorage
+    function obtenerUsuarios() {
+        return JSON.parse(localStorage.getItem('usuarios')) || [];
+    }
+
+    function guardarUsuarios(usuarios) {
+        localStorage.setItem('usuarios', JSON.stringify(usuarios));
+    }
+
+    function encontrarUsuarioPorEmail(email) {
+        const usuarios = obtenerUsuarios();
+        return usuarios.find(u => u.email === email || u.correo === email);
+    }
+
+    function actualizarUsuarioEnAlmacen(usuarioActualizado) {
+        const usuarios = obtenerUsuarios();
+        const idx = usuarios.findIndex(u => (u.email || u.correo) === (usuarioActualizado.email || usuarioActualizado.correo));
+        if (idx !== -1) {
+            usuarios[idx] = { ...usuarios[idx], ...usuarioActualizado };
+            guardarUsuarios(usuarios);
+        } else {
+            // si no existe, agregar
+            usuarios.push(usuarioActualizado);
+            guardarUsuarios(usuarios);
+        }
+    }
+
     const formRegistro = document.getElementById('registro-form');
     if (formRegistro) {
         formRegistro.addEventListener('submit', (e) => {
             e.preventDefault();
 
-            const nuevoUsuario = { 
-                nombre: document.getElementById('nombre').value,
-                apellido: document.getElementById('apellido').value,
-                email: document.getElementById('correo').value,
-                password: document.getElementById('password').value
+            const nombreInput = document.getElementById('nombre') || document.getElementById('modal-registro-nombre');
+            const apellidoInput = document.getElementById('apellido') || document.getElementById('modal-registro-apellido');
+            const emailInput = document.getElementById('correo') || document.getElementById('modal-registro-correo');
+            const passwordInput = document.getElementById('modal-registro-password') || document.getElementById('password');
+
+            // Validar confirmación de contraseña si existe
+            const confirmarPasswordInput = document.getElementById('confirmar-password');
+            if (confirmarPasswordInput && confirmarPasswordInput.value && passwordInput && (confirmarPasswordInput.value !== passwordInput.value)) {
+                alert('Las contraseñas no coinciden.');
+                return;
+            }
+
+            const nuevoUsuario = {
+                nombre: nombreInput?.value || '',
+                apellido: apellidoInput?.value || '',
+                email: (emailInput?.value || '').toLowerCase(),
+                password: passwordInput?.value || '',
+                telefono: (document.getElementById('telefono') || document.getElementById('modal-registro-telefono'))?.value || '',
+                allowBirthdayEditOnce: true
             };
 
-            localStorage.setItem('usuarioRegistrado', JSON.stringify(nuevoUsuario));
+            // Si el formulario de registro incluye un input de tipo date (secciones/registrarse.html), guardar la fecha
+            const fechaInput = document.getElementById('fecha') || document.getElementById('modal-registro-fecha');
+            if (fechaInput && fechaInput.value) {
+                const parts = fechaInput.value.split('-'); // yyyy-mm-dd
+                if (parts.length === 3) {
+                    nuevoUsuario.anioNac = parts[0];
+                    nuevoUsuario.mesNac = parts[1];
+                    nuevoUsuario.diaNac = parts[2];
+                    // Si el usuario se registra desde la página completa, no podrá editar su fecha en el perfil
+                    nuevoUsuario.allowBirthdayEditOnce = false;
+                }
+            }
 
-            alert("Registro exitoso.");
+            const usuarios = obtenerUsuarios();
+            if (usuarios.some(u => (u.email || u.correo) === nuevoUsuario.email)) {
+                alert('Ya existe un usuario con ese correo. Por favor inicia sesión.');
+                if (loginRegisterModal) {
+                    const loginTabButton = document.getElementById('login-tab');
+                    if (loginTabButton) new bootstrap.Tab(loginTabButton).show();
+                }
+                return;
+            }
+
+            usuarios.push(nuevoUsuario);
+            guardarUsuarios(usuarios);
+
+            // Marcar como usuario nuevo para redirigir a perfil después de login
+            sessionStorage.setItem('newUserAfterRegister', 'true');
+
+            if (loginRegisterModal) {
+                const loginTabButton = document.getElementById('login-tab');
+                if (loginTabButton) new bootstrap.Tab(loginTabButton).show();
+                return;
+            }
 
             window.location.href = `${rutaBase}/secciones/iniciarsesion.html`;
         });
@@ -153,12 +283,88 @@ document.addEventListener("DOMContentLoaded", async () => {
         formLogin.addEventListener('submit', (e) => {
             e.preventDefault();
 
-            const inputUsuario = document.getElementById('usuario').value;
+            const inputUsuario = (document.getElementById('usuario').value || '').toLowerCase();
             const inputPass = document.getElementById('password').value;
-            const guardado = JSON.parse(localStorage.getItem('usuarioRegistrado'));
 
-            if (guardado && (inputUsuario === guardado.email) && inputPass === guardado.password) {
-                localStorage.setItem('sesionActiva', JSON.stringify(guardado));
+            const usuarios = obtenerUsuarios();
+            const encontrado = usuarios.find(u => ((u.email || u.correo) === inputUsuario || (u.telefono || '') === inputUsuario) && u.password === inputPass);
+
+            if (encontrado) {
+                localStorage.setItem('sesionActiva', JSON.stringify(encontrado));
+
+                // Si usuario nuevo se registró y ahora inicia sesión, redirigir a perfil
+                if (sessionStorage.getItem('newUserAfterRegister') === 'true') {
+                    sessionStorage.removeItem('newUserAfterRegister');
+
+                    // Guardar la cita pendiente para procesarla después de completar el perfil
+                    if (sessionStorage.getItem('afterAgendaReserve')) {
+                        sessionStorage.setItem('reservaAfterPerfil', sessionStorage.getItem('afterAgendaReserve'));
+                        sessionStorage.removeItem('afterAgendaReserve');
+                    }
+
+                    if (loginRegisterModal) {
+                        loginRegisterModal.hide();
+                    }
+
+                    activarNav('nav-agendar');
+                    cargarComponente('main-content', `${rutaBase}/secciones/perfil.html`);
+                    inicializarLogicaPerfil();
+                    return;
+                }
+
+                // Si venimos de intentar reservar desde un servicio
+                if (sessionStorage.getItem('loginAfterReserve') === 'true') {
+                    sessionStorage.removeItem('loginAfterReserve');
+
+                    if (loginRegisterModal) {
+                        loginRegisterModal.hide();
+                        activarNav('nav-agendar');
+                        cargarComponente('main-content', `${rutaBase}/secciones/reservas.html`);
+                        return;
+                    }
+
+                    window.location.href = `${rutaBase}/index.html?reserva=true`;
+                    return;
+                }
+
+                // Si venimos desde el formulario de agenda que mostró el modal de auth
+                if (sessionStorage.getItem('afterAgendaReserve')) {
+                    try {
+                        const reservaPendiente = JSON.parse(sessionStorage.getItem('afterAgendaReserve'));
+                        sessionStorage.removeItem('afterAgendaReserve');
+
+                        if (typeof guardarReserva === 'function') {
+                            guardarReserva(reservaPendiente);
+                        }
+
+                        // Mostrar confirmación si existe el toast, si no usar alert
+                        const toastEl = document.getElementById('reservationToast');
+                        if (toastEl && bootstrap && bootstrap.Toast) {
+                            const t = new bootstrap.Toast(toastEl);
+                            t.show();
+                        } else {
+                            alert('Reserva registrada exitosamente.');
+                        }
+
+                        // Asegurar que las notificaciones se actualicen
+                        if (typeof actualizarNotificaciones === 'function') actualizarNotificaciones();
+
+                        if (loginRegisterModal) {
+                            loginRegisterModal.hide();
+                        }
+
+                        // Redirigir a inicio donde el navbar mostrará la campana actualizada
+                        window.location.href = `${rutaBase}/index.html`;
+                        return;
+                    } catch (err) {
+                        console.error('Error procesando reserva pendiente:', err);
+                    }
+                }
+
+                if (loginRegisterModal) {
+                    loginRegisterModal.hide();
+                }
+
                 window.location.href = `${rutaBase}/index.html`;
             } else {
                 alert('Usuario o contraseña incorrectos');
@@ -401,23 +607,78 @@ function cerrarSesion() {
 function inicializarLogicaPerfil() {
     const form = document.getElementById('formEditarPerfil');
     const sesion = JSON.parse(localStorage.getItem('sesionActiva'));
+    const selectMes = document.getElementById('selectMes');
+    const selectDia = document.getElementById('selectDia');
+    const selectAnio = document.getElementById('selectAnio');
 
-    if (!sesion || !form) return;
+    if (!sesion || !form || !selectMes || !selectDia || !selectAnio) return;
+
+    const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+
+    const actualizarDias = () => {
+        const mesIndex = meses.indexOf(selectMes.value);
+        const anio = parseInt(selectAnio.value, 10) || new Date().getFullYear();
+        const diasEnMes = new Date(anio, mesIndex + 1, 0).getDate();
+        const diaActual = parseInt(selectDia.value, 10);
+
+        selectDia.innerHTML = '';
+        for (let i = 1; i <= diasEnMes; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = i;
+            selectDia.appendChild(option);
+        }
+
+        if (diaActual && diaActual <= diasEnMes) {
+            selectDia.value = diaActual;
+        }
+    };
+
+    const llenarAnios = () => {
+        const actual = new Date().getFullYear();
+        selectAnio.innerHTML = '';
+        for (let año = actual; año >= 1900; año--) {
+            const option = document.createElement('option');
+            option.value = año;
+            option.textContent = año;
+            selectAnio.appendChild(option);
+        }
+    };
+
+    llenarAnios();
+    actualizarDias();
+    selectMes.addEventListener('change', actualizarDias);
+    selectAnio.addEventListener('change', actualizarDias);
 
     // 1. Rellenar campos con los datos almacenados
     // Usamos || '' para evitar que se muestre "undefined" si el dato no existe
     document.getElementById('inputNombre').value = sesion.nombre || '';
     document.getElementById('inputTelefono').value = sesion.telefono || '';
+    document.getElementById('inputPasswordActual').value = '';
+    document.getElementById('inputPasswordNueva').value = '';
     
     // Seleccionar opciones en los <select>
     if (sesion.genero) document.getElementById('selectGenero').value = sesion.genero;
-    if (sesion.mesNac) document.getElementById('selectMes').value = sesion.mesNac;
-    if (sesion.diaNac) document.getElementById('selectDia').value = sesion.diaNac;
-    if (sesion.anioNac) document.getElementById('selectAnio').value = sesion.anioNac;
+    if (sesion.mesNac) selectMes.value = sesion.mesNac;
+    if (sesion.anioNac) selectAnio.value = sesion.anioNac;
+    actualizarDias();
+    if (sesion.diaNac) selectDia.value = sesion.diaNac;
     
     // Marcar los checkboxes
     document.getElementById('checkPromociones').checked = !!sesion.promoWpp;
     document.getElementById('checkCitas').checked = !!sesion.citasWpp;
+
+    // Habilitar edición de nacimiento solo para nuevo usuario desde agenda una vez
+    const puedeEditarNacimiento = !!sesion.allowBirthdayEditOnce;
+    const birthFields = [selectMes, selectDia, selectAnio];
+    birthFields.forEach(field => {
+        field.disabled = !puedeEditarNacimiento;
+        if (field.disabled) {
+            field.classList.add('disabled-input');
+        } else {
+            field.classList.remove('disabled-input');
+        }
+    });
 
     // 2. Escuchar el evento de envío del formulario
     form.addEventListener('submit', (e) => {
@@ -426,16 +687,74 @@ function inicializarLogicaPerfil() {
         // Actualizar el objeto sesion con los valores actuales del formulario
         sesion.nombre = document.getElementById('inputNombre').value;
         sesion.telefono = document.getElementById('inputTelefono').value;
+        const passwordActual = document.getElementById('inputPasswordActual').value.trim();
+        const passwordNueva = document.getElementById('inputPasswordNueva').value.trim();
+        if (passwordNueva) {
+            if (!passwordActual) {
+                alert('Debes ingresar tu contraseña actual para cambiarla.');
+                return;
+            }
+            if (passwordActual !== sesion.password) {
+                alert('La contraseña actual no coincide.');
+                return;
+            }
+            sesion.password = passwordNueva;
+        }
         sesion.genero = document.getElementById('selectGenero').value;
-        sesion.mesNac = document.getElementById('selectMes').value;
-        sesion.diaNac = document.getElementById('selectDia').value;
-        sesion.anioNac = document.getElementById('selectAnio').value;
         sesion.promoWpp = document.getElementById('checkPromociones').checked;
         sesion.citasWpp = document.getElementById('checkCitas').checked;
 
-        // Guardar cambios en el localStorage
+        const selectMes = document.getElementById('selectMes');
+        const selectDia = document.getElementById('selectDia');
+        const selectAnio = document.getElementById('selectAnio');
+        const puedeEditarNacimiento = !!sesion.allowBirthdayEditOnce;
+
+        if (puedeEditarNacimiento) {
+            const mesNac = selectMes.value;
+            const diaNac = selectDia.value;
+            const anioNac = selectAnio.value;
+            if (mesNac && diaNac && anioNac) {
+                sesion.mesNac = mesNac;
+                sesion.diaNac = diaNac;
+                sesion.anioNac = anioNac;
+                sesion.allowBirthdayEditOnce = false;
+            }
+        }
+        
         localStorage.setItem('sesionActiva', JSON.stringify(sesion));
-        localStorage.setItem('usuarioRegistrado', JSON.stringify(sesion));
+        actualizarUsuarioEnAlmacen(sesion);
+
+        // Si hay una reserva pendiente después de completar el perfil, guardarla ahora
+        if (sessionStorage.getItem('reservaAfterPerfil')) {
+            try {
+                const reservaPendiente = JSON.parse(sessionStorage.getItem('reservaAfterPerfil'));
+                sessionStorage.removeItem('reservaAfterPerfil');
+                
+                if (typeof guardarReserva === 'function') {
+                    guardarReserva(reservaPendiente);
+                } else {
+                    const usuario = obtenerUsuarioActivo();
+                    let reservas = JSON.parse(localStorage.getItem('reservas')) || [];
+                    reservas.push({
+                        ...reservaPendiente,
+                        usuarioEmail: usuario.email,
+                        usuarioNombre: usuario.nombre,
+                        fechaRegistro: new Date().toISOString()
+                    });
+                    localStorage.setItem('reservas', JSON.stringify(reservas));
+                }
+                
+                if (typeof actualizarNotificaciones === 'function') actualizarNotificaciones();
+                
+                alert("¡Perfil actualizado correctamente y cita registrada!");
+                
+                // Refrescar el Navbar para que muestre el nombre actualizado
+                inicializarNavbar();
+                return;
+            } catch (err) {
+                console.error('Error procesando reserva pendiente:', err);
+            }
+        }
 
         alert("¡Perfil actualizado correctamente!");
         
@@ -755,13 +1074,23 @@ function activarSideMenu(id) {
     }
 }
 
+function obtenerUsuarioActivo() {
+    const sesion = JSON.parse(localStorage.getItem('sesionActiva')) || {};
+    return {
+        email: sesion.email || sesion.correo || '',
+        nombre: sesion.nombre || ''
+    };
+}
+
 /* guardar reservas */
 function guardarReserva(reserva) {
-
     let reservas = JSON.parse(localStorage.getItem('reservas')) || [];
+    const usuario = obtenerUsuarioActivo();
 
     reservas.push({
         ...reserva,
+        usuarioEmail: usuario.email,
+        usuarioNombre: usuario.nombre,
         fechaRegistro: new Date().toISOString()
     });
 
@@ -770,19 +1099,22 @@ function guardarReserva(reserva) {
     actualizarNotificaciones();
 }
 
+function obtenerReservasUsuario() {
+    const usuario = obtenerUsuarioActivo();
+    const reservas = JSON.parse(localStorage.getItem('reservas')) || [];
+    if (!usuario.email) return [];
+    return reservas.filter(reserva => reserva.usuarioEmail === usuario.email);
+}
+
 function actualizarNotificaciones() {
-
     const lista = document.getElementById('lista-notificaciones');
-
     if (!lista) return;
 
-    const reservas = JSON.parse(localStorage.getItem('reservas')) || [];
+    const reservas = obtenerReservasUsuario();
 
     if (reservas.length === 0) {
-
         lista.innerHTML = 'No tienes notificaciones nuevas.';
         return;
-
     }
 
     lista.innerHTML = reservas
@@ -790,23 +1122,17 @@ function actualizarNotificaciones() {
         .reverse()
         .map(reserva => `
             <div class="notification-item border-bottom pb-2 mb-2">
-
                 <strong>📅 Reserva confirmada</strong>
-
                 <div>
                     ${reserva.servicio}
                 </div>
-
                 <small>
                     ${reserva.fecha} - ${reserva.hora}
                 </small>
-
                 <br>
-
                 <small>
                     👤 ${reserva.barbero}
                 </small>
-
             </div>
         `)
         .join('');

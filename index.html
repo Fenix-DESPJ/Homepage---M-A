@@ -19,6 +19,78 @@
     
     <div id="footer-container"></div>
 
+    <div class="modal fade" id="loginRegisterModal" tabindex="-1" aria-labelledby="loginRegisterModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content custom-modal">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title text-gold fw-bold" id="loginRegisterModalLabel">Accede a tu cuenta</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <img src="img/logo.jpeg" alt="M&A Logo" class="modal-logo">
+                    <ul class="nav nav-tabs mb-4" id="authTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="login-tab" data-bs-toggle="tab" data-bs-target="#loginTab" type="button" role="tab" aria-controls="loginTab" aria-selected="true">Iniciar Sesión</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="register-tab" data-bs-toggle="tab" data-bs-target="#registerTab" type="button" role="tab" aria-controls="registerTab" aria-selected="false">Registrarse</button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="loginTab" role="tabpanel" aria-labelledby="login-tab">
+                            <form id="form-login">
+                                <div class="mb-3">
+                                    <label for="usuario" class="form-label">Usuario o Número de Teléfono</label>
+                                    <input type="text" class="form-control custom-input" id="usuario" placeholder="ejemplo@gmail.com">
+                                </div>
+                                <div class="mb-4">
+                                    <label for="password" class="form-label">Contraseña</label>
+                                    <input type="password" class="form-control custom-input" id="password" placeholder="Ingresa tu contraseña">
+                                </div>
+                                <button type="submit" class="btn btn-reserve w-100">Iniciar Sesión</button>
+                            </form>
+                            <div class="text-center mt-3">
+                                <button type="button" class="btn btn-link" id="switchToRegisterBtn">¿No tienes cuenta? Regístrate</button>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="registerTab" role="tabpanel" aria-labelledby="register-tab">
+                            <form id="registro-form">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="modal-registro-nombre" class="form-label">Nombre</label>
+                                        <input type="text" class="form-control custom-input" id="modal-registro-nombre" placeholder="Ingresa tu nombre">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="modal-registro-apellido" class="form-label">Apellido</label>
+                                        <input type="text" class="form-control custom-input" id="modal-registro-apellido" placeholder="Ingresa tu apellido">
+                                    </div>
+                                </div>
+                                <div class="mb-3 mt-3">
+                                    <label for="modal-registro-correo" class="form-label">Correo electrónico</label>
+                                    <input type="email" class="form-control custom-input" id="modal-registro-correo" placeholder="ejemplo@correo.com">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="modal-registro-password" class="form-label">Contraseña</label>
+                                    <input type="password" class="form-control custom-input" id="modal-registro-password" placeholder="Crea una contraseña">
+                                </div>
+                                <div class="mb-4">
+                                    <label for="modal-registro-confirm-password" class="form-label">Confirmar contraseña</label>
+                                    <input type="password" class="form-control custom-input" id="modal-registro-confirm-password" placeholder="Confirma tu contraseña">
+                                </div>
+                                <button type="submit" class="btn btn-reserve w-100">Registrarse</button>
+                            </form>
+                            <div class="text-center mt-3">
+                                <button type="button" class="btn btn-link" id="switchToLoginBtn">¿Ya tienes cuenta? Inicia sesión</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/script.js"></script>
 </body>

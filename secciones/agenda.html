@@ -7,7 +7,9 @@
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/agenda.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
   <link rel="icon" type="image/jpeg" href="../img/logo.jpeg">
 </head>
 
@@ -47,7 +49,7 @@
               <h2>Agenda tu cita</h2>
             </div>
 
-            <form>
+            <form id="agenda-form">
               <div class="row g-3">
 
                 <div class="col-md-6">
@@ -64,30 +66,52 @@
                   <label class="form-label">Servicio</label>
                   <select class="form-select">
                     <option selected>Selecciona una opción</option>
-                    <option>Corte clásico</option>
-                    <option>Barba</option>
-                    <option>Corte + barba</option>
-                    <option>Servicio premium</option>
+                    <option value="Corte Clásico">Corte Clásico</option>
+                    <option value="Corte + Barba">Corte + Barba</option>
+                    <option value="Perfilado de Barba">Perfilado de Barba</option>
+                    <option value="Corte + cejas">Corte + cejas</option>
                   </select>
                 </div>
 
-                <div class="col-md-6">
-                  <label class="form-label">Fecha</label>
-                  <input type="date" class="form-control">
+                <div class="col-12">
+                  <label class="form-label">Fecha de la Cita</label>
+                  <div class="calendar-container-agenda">
+                    <div class="calendar-header">
+                      <button class="month-btn" id="prevMonth" type="button"><i class="bi bi-chevron-left"></i></button>
+                      <h5 id="currentMonthYear">Septiembre 2026</h5>
+                      <button class="month-btn" id="nextMonth" type="button"><i class="bi bi-chevron-right"></i></button>
+                    </div>
+                    <div class="weekdays">
+                      <span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span>
+                    </div>
+                    <div class="calendar-days" id="calendarDays"></div>
+                  </div>
+                  <input type="hidden" id="selectedFecha" value="">
                 </div>
 
-                <div class="col-md-6">
-                  <label class="form-label">Hora</label>
-                  <input type="time" class="form-control">
+                <div class="col-12">
+                  <label class="form-label">Hora de la Cita</label>
+                  <div class="hours-grid-agenda" id="hoursGridAgenda"></div>
+                  <input type="hidden" id="selectedHora" value="">
                 </div>
 
                 <div class="col-md-6">
                   <label class="form-label">Barbero</label>
                   <select class="form-select">
-                    <option selected>Sin preferencia</option>
-                    <option>Barbero 1</option>
-                    <option>Barbero 2</option>
-                    <option>Barbero 3</option>
+                    <option selected value="Sin preferencia">Sin preferencia</option>
+                    <option value="Juan Pablo">Juan Pablo</option>
+                    <option value="Andrés Martínez">Andrés Martínez</option>
+                    <option value="Maicol Díaz">Maicol Díaz</option>
+                  </select>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label">Método de Pago</label>
+                  <select class="form-select" id="metodoPago">
+                    <option selected value="">Selecciona una opción</option>
+                    <option value="Tarjeta de Crédito">Tarjeta de Crédito</option>
+                    <option value="PSE">PSE</option>
+                    <option value="Efectivo">Efectivo</option>
                   </select>
                 </div>
 
@@ -97,7 +121,7 @@
                 </div>
 
                 <div class="col-12 text-center">
-                  <button type="button" class="btn btn-dorado mt-3" onclick="window.location.href='../index.html';">
+                  <button type="button" id="btnEnviarAgenda" class="btn btn-dorado mt-3">
                     Enviar solicitud
                   </button>
                 </div>
@@ -111,6 +135,215 @@
     </div>
 
   </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../js/script.js"></script>
+  <script>
+    document.getElementById('btnEnviarAgenda').addEventListener('click', function () {
+      const sesion = JSON.parse(localStorage.getItem('sesionActiva'));
+
+      const nombre = document.querySelector('input[placeholder^="Ej:"]')?.value || '';
+      const telefono = document.querySelector('input[type="tel"]')?.value || '';
+      const servicio = document.querySelector('select')?.value || '';
+      const fecha = document.getElementById('selectedFecha')?.value || '';
+      const hora = document.getElementById('selectedHora')?.value || '';
+      const barbero = Array.from(document.querySelectorAll('select'))[1]?.value || '';
+      const metodoPago = document.getElementById('metodoPago')?.value || '';
+
+      const reserva = {
+        servicio: servicio,
+        barbero: barbero,
+        fecha: fecha,
+        hora: hora,
+        metodoPago: metodoPago,
+        nombre: nombre,
+        telefono: telefono,
+      };
+
+      if (!sesion) {
+        // Guardar la reserva pendiente y mostrar el modal de auth
+        sessionStorage.setItem('afterAgendaReserve', JSON.stringify(reserva));
+        const modalEl = document.getElementById('loginRegisterModal');
+        const loginRegisterModal = new bootstrap.Modal(modalEl);
+        loginRegisterModal.show();
+        return;
+      }
+
+      // Si hay sesión, guardar reserva directamente
+      if (typeof guardarReserva === 'function') {
+        guardarReserva(reserva);
+      } else {
+        let reservas = JSON.parse(localStorage.getItem('reservas')) || [];
+        reservas.push({ ...reserva, fechaRegistro: new Date().toISOString() });
+        localStorage.setItem('reservas', JSON.stringify(reservas));
+      }
+
+      if (typeof actualizarNotificaciones === 'function') actualizarNotificaciones();
+      window.location.href = '../index.html';
+
+    });
+
+    // --- CALENDARIO Y HORAS PARA AGENDA ---
+    function inicializarCalendarioAgenda() {
+      const calendarDays = document.getElementById('calendarDays');
+      const currentMonthYear = document.getElementById('currentMonthYear');
+      const prevMonth = document.getElementById('prevMonth');
+      const nextMonth = document.getElementById('nextMonth');
+      const hoursGrid = document.getElementById('hoursGridAgenda');
+      const selectedFechaInput = document.getElementById('selectedFecha');
+      const selectedHoraInput = document.getElementById('selectedHora');
+
+      let mesOffset = 0;
+
+      function renderizarCalendario() {
+        const fechaBase = new Date();
+        fechaBase.setMonth(fechaBase.getMonth() + mesOffset);
+        
+        const nombreMes = fechaBase.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+        currentMonthYear.textContent = nombreMes.charAt(0).toUpperCase() + nombreMes.slice(1);
+
+        calendarDays.innerHTML = '';
+        
+        const primerDia = new Date(fechaBase.getFullYear(), fechaBase.getMonth(), 1).getDay();
+        const diasEnMes = new Date(fechaBase.getFullYear(), fechaBase.getMonth() + 1, 0).getDate();
+        const offset = (primerDia === 0) ? 6 : primerDia - 1;
+
+        for (let i = 0; i < offset; i++) calendarDays.innerHTML += '<span></span>';
+
+        const hoy = new Date();
+        hoy.setHours(0,0,0,0);
+        const fechaLimite = new Date();
+        fechaLimite.setMonth(fechaLimite.getMonth() + 1);
+        fechaLimite.setHours(23, 59, 59, 999);
+
+        for (let i = 1; i <= diasEnMes; i++) {
+          const fechaActual = new Date(fechaBase.getFullYear(), fechaBase.getMonth(), i);
+          const btn = document.createElement('button');
+          btn.className = 'day';
+          btn.type = 'button';
+          btn.textContent = i;
+
+          if (fechaActual < hoy || fechaActual > fechaLimite) {
+            btn.disabled = true;
+            btn.classList.add('disabled-day');
+          } else {
+            btn.addEventListener('click', (e) => {
+              e.preventDefault();
+              document.querySelectorAll('.day').forEach(d => d.classList.remove('selected-day'));
+              btn.classList.add('selected-day');
+              selectedFechaInput.value = fechaActual.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+            });
+          }
+          calendarDays.appendChild(btn);
+        }
+      }
+
+      prevMonth.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (mesOffset > 0) { mesOffset--; renderizarCalendario(); }
+      });
+
+      nextMonth.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (mesOffset < 1) { mesOffset++; renderizarCalendario(); }
+      });
+
+      // Generar horas
+      const horas = ['08:00 AM', '09:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '01:00 PM', '02:00 PM', '03:00 PM', '04:00 PM', '05:00 PM', '06:00 PM', '07:00 PM'];
+      hoursGrid.innerHTML = '';
+      horas.forEach(hora => {
+        const btn = document.createElement('button');
+        btn.className = 'hour-card';
+        btn.type = 'button';
+        btn.textContent = hora;
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          document.querySelectorAll('.hour-card').forEach(h => h.classList.remove('hour-selected'));
+          btn.classList.add('hour-selected');
+          selectedHoraInput.value = hora;
+        });
+        hoursGrid.appendChild(btn);
+      });
+
+      renderizarCalendario();
+    }
+
+    // Inicializar cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', inicializarCalendarioAgenda);
+  </script>
+
+  <!-- Modal de Login/Registro -->
+  <div class="modal fade" id="loginRegisterModal" tabindex="-1" aria-labelledby="loginRegisterModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content custom-modal">
+        <div class="modal-header border-0">
+          <h5 class="modal-title text-gold fw-bold" id="loginRegisterModalLabel">Accede a tu cuenta</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <img src="../img/logo.jpeg" alt="M&A Logo" class="modal-logo">
+          <ul class="nav nav-tabs mb-4" id="authTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="login-tab" data-bs-toggle="tab" data-bs-target="#loginTab" type="button" role="tab" aria-controls="loginTab" aria-selected="true">Iniciar Sesión</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="register-tab" data-bs-toggle="tab" data-bs-target="#registerTab" type="button" role="tab" aria-controls="registerTab" aria-selected="false">Registrarse</button>
+            </li>
+          </ul>
+
+          <div class="tab-content">
+            <div class="tab-pane fade show active" id="loginTab" role="tabpanel" aria-labelledby="login-tab">
+              <form id="form-login">
+                <div class="mb-3">
+                  <label for="usuario" class="form-label">Usuario o Número de Teléfono</label>
+                  <input type="text" class="form-control custom-input" id="usuario" placeholder="ejemplo@gmail.com">
+                </div>
+                <div class="mb-4">
+                  <label for="password" class="form-label">Contraseña</label>
+                  <input type="password" class="form-control custom-input" id="password" placeholder="Ingresa tu contraseña">
+                </div>
+                <button type="submit" class="btn btn-reserve w-100">Iniciar Sesión</button>
+              </form>
+              <div class="text-center mt-3">
+                <button type="button" class="btn btn-link" id="switchToRegisterBtn">¿No tienes cuenta? Regístrate</button>
+              </div>
+            </div>
+
+            <div class="tab-pane fade" id="registerTab" role="tabpanel" aria-labelledby="register-tab">
+              <form id="registro-form">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label for="modal-registro-nombre" class="form-label">Nombre</label>
+                    <input type="text" class="form-control custom-input" id="modal-registro-nombre" placeholder="Ingresa tu nombre">
+                  </div>
+                  <div class="col-md-6">
+                    <label for="modal-registro-apellido" class="form-label">Apellido</label>
+                    <input type="text" class="form-control custom-input" id="modal-registro-apellido" placeholder="Ingresa tu apellido">
+                  </div>
+                </div>
+                <div class="mb-3 mt-3">
+                  <label for="modal-registro-correo" class="form-label">Correo electrónico</label>
+                  <input type="email" class="form-control custom-input" id="modal-registro-correo" placeholder="ejemplo@correo.com">
+                </div>
+                <div class="mb-3">
+                  <label for="modal-registro-password" class="form-label">Contraseña</label>
+                  <input type="password" class="form-control custom-input" id="modal-registro-password" placeholder="Crea una contraseña">
+                </div>
+                <div class="mb-4">
+                  <label for="modal-registro-confirm-password" class="form-label">Confirmar contraseña</label>
+                  <input type="password" class="form-control custom-input" id="modal-registro-confirm-password" placeholder="Confirma tu contraseña">
+                </div>
+                <button type="submit" class="btn btn-reserve w-100">Registrarse</button>
+              </form>
+              <div class="text-center mt-3">
+                <button type="button" class="btn btn-link" id="switchToLoginBtn">¿Ya tienes cuenta? Inicia sesión</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
 </body>
 </html>
