@@ -746,7 +746,7 @@ function inicializarLogicaPerfil() {
                 
                 if (typeof actualizarNotificaciones === 'function') actualizarNotificaciones();
                 
-                alert("¡Perfil actualizado correctamente y cita registrada!");
+                alert("Los datos han sido guardados.");
                 
                 // Refrescar el Navbar para que muestre el nombre actualizado
                 inicializarNavbar();
@@ -756,7 +756,7 @@ function inicializarLogicaPerfil() {
             }
         }
 
-        alert("¡Perfil actualizado correctamente!");
+        alert("Los datos han sido guardados.");
         
         // Refrescar el Navbar para que muestre el nombre actualizado
         inicializarNavbar();
