@@ -725,8 +725,29 @@ h1, h2, h3, h4 {
     visibility: hidden;
     transform: translateY(-10px);
     transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    max-height: 400px;
+    overflow-y: auto;
+}
+#notificaciones-panel::-webkit-scrollbar{
+    width: 8px;
 }
 
+/* Fondo de la barra */
+#notificaciones-panel::-webkit-scrollbar-track{
+    background: #30302E;
+    border-radius: 10px;
+}
+
+/* Parte que se mueve */
+#notificaciones-panel::-webkit-scrollbar-thumb{
+    background: #FFC600;
+    border-radius: 10px;
+}
+
+/* Efecto al pasar el mouse */
+#notificaciones-panel::-webkit-scrollbar-thumb:hover{
+    background: #BF930D;
+}
 #notificaciones-panel.active {
     display: block;
     opacity: 1;
@@ -1005,10 +1026,13 @@ h5 {
     justify-content: center;
     align-items: center;
 }
+
 .reservation-header {
     padding: 70px 0 40px;
 }
-
+.reservation-section{
+    padding-bottom: 70px;
+}
 .page-title {
     font-size: 4rem;
     font-weight: bold;
@@ -1463,6 +1487,104 @@ h5 {
     background: #111;
     color: white;
     border: 1px solid rgba(255,198,0,.15);
+}
+
+.mis-reservas-container {
+    max-width: 900px;
+    margin: 40px auto;
+}
+
+.reserva-card {
+    background: #111;
+    border: 1px solid rgba(255,198,0,.15);
+    border-radius: 18px;
+    padding: 30px;
+    margin-bottom: 25px;
+    box-shadow: 0 10px 25px rgba(0,0,0,.35);
+}
+
+.reserva-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.reserva-title {
+    color: var(--dorado-branding);
+    font-family: var(--fuente-titulos);
+    font-size: 1.8rem;
+}
+
+.reserva-info {
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+    gap: 15px;
+}
+
+.reserva-item {
+    background: #1a1a1a;
+    padding: 15px;
+    border-radius: 12px;
+}
+
+.reserva-item span {
+    display: block;
+    color: #999;
+    margin-bottom: 5px;
+}
+
+.reserva-item strong {
+    color: white;
+}
+
+.btn-cancelar-reserva {
+    margin-top: 25px;
+    background: #c62828;
+    border: none;
+    color: white;
+    font-weight: bold;
+    padding: 12px 20px;
+    border-radius: 12px;
+    transition: .3s;
+}
+
+.btn-cancelar-reserva:hover {
+    background: #e53935;
+}
+
+.no-reservas {
+    text-align: center;
+    padding: 60px;
+    background: #111;
+    border-radius: 20px;
+}
+
+.no-reservas h3 {
+    color: var(--dorado-branding);
+}
+
+.btn-volver-agendar{
+    border:1px solid var(--dorado-branding);
+    color:white;
+    text-decoration:none;
+    padding:12px 18px;
+    border-radius:12px;
+    transition:.3s;
+    font-weight:600;
+}
+
+.btn-volver-agendar:hover{
+    background:var(--dorado-branding);
+    color:black;
+}
+
+@media(max-width:768px){
+
+    .reserva-info{
+        grid-template-columns:1fr;
+    }
+
 }
 
 @media (max-width: 991px) {
