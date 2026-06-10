@@ -817,7 +817,7 @@ h1, h2, h3, h4 {
     /* Esto crea el grid responsivo automáticamente */
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 30px;
-    max-width: 1000px;
+    max-width: 1200px;
     margin: 40px auto;
 }
 
@@ -832,11 +832,13 @@ h1, h2, h3, h4 {
 
 .servicio-card:hover {
     transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0,0,0,.5);
+    border-color: #FFD84D;
 }
 
 .servicio-img {
     width: 100%;
-    height: 200px; /* Altura fija para que todas las tarjetas sean iguales */
+    height: 280px; /* Altura fija para que todas las tarjetas sean iguales */
     object-fit: cover;
     border-radius: 15px;
     margin-bottom: 20px;
@@ -854,6 +856,18 @@ h1, h2, h3, h4 {
 .servicio-card .btn-warning:hover {
     background-color: #e6b200;
 }
+.titulo-card-servicio{
+    color: white;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.descripcion-card-servicio{
+    color: rgba(255,255,255,.65);
+    font-size: .95rem;
+    min-height: 60px;
+    margin-bottom: 20px;
+}
 
 /* Dale espacio al main para que el navbar fijo no tape el contenido */
 #main-content {
@@ -869,6 +883,20 @@ h1, h2, h3, h4 {
 }
 
 /* Servicios Individuales*/
+.titulo-servicios{
+    color: white;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.subtitulo-servicios{
+    color: rgba(255,255,255,.65);
+    font-size: 1.05rem;
+    margin-bottom: 50px;
+    text-align: center;
+}
 .servicios-grid-precios {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -876,16 +904,92 @@ h1, h2, h3, h4 {
 }
 
 .card-precio {
-    background-color: #FFC600; /* Amarillo marca */
-    color: #000;
-    padding: 15px;
-    border-radius: 15px;
-    transition: transform 0.2s;
+    background: linear-gradient(145deg, #151515, #1f1f1f);
+    color: white;
+    padding: 26px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,198,0,0.12);
+    transition: all .35s ease;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 260px;
+}
+
+.card-precio h6 {
+    color: #ffffff;
+    margin-bottom: 2px;
+}
+
+.card-precio small {
+    color: #bdbdbd;
+}
+
+.card-precio span {
+    color: #FFC600;
+    font-weight: bold;
 }
 
 .card-precio:hover {
-    transform: scale(1.02);
+    transform: translateY(-8px);
+    border-color: rgba(255,198,0,.45);
+    box-shadow: 0 20px 40px rgba(0,0,0,.55);
 }
+
+/* Imagen dentro de las tarjetas de servicios */
+.card-precio-img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 14px;
+    margin-bottom: 18px;
+}
+/* Badge más elegante (menos agresivo que amarillo plano) */
+.section-badge {
+    background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+    color: var(--dorado);
+    border: 1px solid rgba(255,198,0,0.25);
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 14px;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+/* Botón reservar más elegante */
+.btn-servicio-reservar {
+    background: transparent;
+    border: 1px solid var(--dorado);
+    color: var(--dorado);
+    border-radius: 12px;
+    padding: 6px 16px;
+    font-size: .9rem;
+    transition: all .3s ease;
+}
+
+.btn-servicio-reservar:hover {
+    background-color: var(--dorado);
+    color: #111;
+    transform: translateY(-2px);
+}
+
+/* Botón regresar mejorado */
+.btn-regresar-elegante {
+    border: 1px solid rgba(255,198,0,.20);
+    background: transparent;
+    color: #d4d4d4;
+    padding: 10px 18px;
+    border-radius: 12px;
+    transition: all .3s ease;
+}
+
+.btn-regresar-elegante:hover {
+    color: var(--dorado);
+    border-color: var(--dorado);
+    transform: translateX(-4px);
+}
+
 
 /* Ajuste para la imagen */
 .img-fluid {
@@ -1918,3 +2022,19 @@ select.form-control-custom {
     color: white;
     z-index: 2;
 }
+
+/* ================================
+   🔶 SECCIÓN BADGE (TÍTULOS LATERALES)
+================================ */
+.section-badge {
+    background: linear-gradient(135deg, #FFC600, #FFD43E);
+    color: #111;
+    font-weight: bold;
+    padding: 12px 18px;
+    border-radius: 12px;
+    display: inline-block;
+    margin-top: 10px;
+    font-size: 0.95rem;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+}
+
